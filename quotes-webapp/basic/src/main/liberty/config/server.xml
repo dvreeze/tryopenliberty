@@ -1,0 +1,11 @@
+<server description="Quotes web application">
+    <featureManager>
+        <feature>restfulWS-3.1</feature>
+        <feature>jsonb-3.0</feature>
+    </featureManager>
+
+    <httpEndpoint httpPort="${http.port}" httpsPort="${https.port}"
+                  id="defaultHttpEndpoint" host="*" />
+
+    <webApplication location="basic.war" contextRoot="${app.context.root}"/>
+</server>
