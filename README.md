@@ -48,7 +48,8 @@ The first thing the `server.xml` file must contain is a complete set of *feature
 point of view, but probably transitively pulls in a lot of fine-grained features that are not used.
 
 In a way this *feature set* is the starting point for reasoning about the project. Obviously, the dependencies in the POM file
-(in particular the ones with scope `provided`) must be complete w.r.t. the enabled features.
+(in particular the ones with scope `provided`) must be complete w.r.t. the enabled features, to the extent these features are
+used.
 
 For the remainder of the `server.xml` configuration, it may be desirable to consult the above-mentioned Open Liberty guides.
 
