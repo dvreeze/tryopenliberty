@@ -34,18 +34,18 @@ For more information on the specifics, see the reference material mentioned abov
 
 As a Jakarta EE Maven project producing a WAR file, the project:
 * has a Maven POM file where the `packaging` is `war`
-* has dependencies such as `jakarta.jakartaee-api` (scope `provided`) and `microprofile` (scope `provided`) in the POM file, among other dependencies
+* has dependencies such as `jakarta.platform:jakarta.jakartaee-api` (scope `provided`) and `org.eclipse.microprofile:microprofile` (scope `provided`, type `pom`) in the POM file, among other dependencies
 * has a POM file for which the POM files in the above-mentioned Open Libery guides can be used as starting point
 * has ("Maven standard") source directories such as `src/main/java` and `src/test/java`
 * has a `src/main/webapp` directory, and if needed a `src/main/webapp/WEB-INF/web.xml` file
 
 As a project targetting the Open Liberty application server, the project:
-* depends on the `liberty-maven-plugin` in its POM file
-* contains a `liberty/config/server.xml` file (or a file set making up the server configuration)
+* depends on the `io.openliberty.tools:liberty-maven-plugin` in its POM file
+* contains a `src/main/liberty/config/server.xml` file (or a file set making up the server configuration)
 
 The first thing the `server.xml` file must contain is a complete set of *features*. The feature set can be fine-grained
 (e.g. `restfulWS-3.1`, `jsonb-3.0` etc.) or coarse-grained (e.g. `jakartaee-10.0`). The latter is easy from a configuration
-point of view, but probably pulls in a lot of fine-grained features that are not used.
+point of view, but probably transitively pulls in a lot of fine-grained features that are not used.
 
 In a way this *feature set* is the starting point for reasoning about the project. Obviously, the dependencies in the POM file
 (in particular the ones with scope `provided`) must be complete w.r.t. the enabled features.
