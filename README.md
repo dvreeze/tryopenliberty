@@ -6,9 +6,11 @@ It is about learning and creating some "reference projects" that may be helpful 
 ## Reference material
 
 This project uses some reference material itself, such as:
+* [Apache Maven](https://maven.apache.org/)
 * [Open Liberty Guides](https://openliberty.io/guides/)
 * [Open Liberty Documentation](https://openliberty.io/docs/latest/overview.html)
 * [Open Liberty Feature Overview](https://openliberty.io/docs/latest/reference/feature/feature-overview.html)
+* [Open Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven)
 * [Jakarta EE Documentation](https://jakarta.ee/learn/#documentation)
 * [Jakarta EE Specifications](https://jakarta.ee/specifications/)
 * [Jakarta EE 11 API Documentation](https://jakarta.ee/specifications/platform/11/apidocs/)
@@ -35,7 +37,7 @@ For more information on the specifics, see the reference material mentioned abov
 As a Jakarta EE Maven project producing a WAR file, the project:
 * has a Maven POM file where the `packaging` is `war`
 * has dependencies such as `jakarta.platform:jakarta.jakartaee-api` (scope `provided`) and `org.eclipse.microprofile:microprofile` (scope `provided`, type `pom`) in the POM file, among other dependencies
-* has a POM file for which the POM files in the above-mentioned Open Libery guides can be used as starting point
+* has a POM file for which the POM files in the above-mentioned Open Liberty guides can be used as starting point(s)
 * has ("Maven standard") source directories such as `src/main/java` and `src/test/java`
 * has a `src/main/webapp` directory, and if needed a `src/main/webapp/WEB-INF/web.xml` file
 
