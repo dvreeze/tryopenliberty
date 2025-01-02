@@ -40,7 +40,7 @@ As a Jakarta EE Maven project producing a WAR file, the project:
 * has a `src/main/webapp` directory, and if needed a `src/main/webapp/WEB-INF/web.xml` file
 
 As a project targetting the Open Liberty application server, the project:
-* depends on the `io.openliberty.tools:liberty-maven-plugin` in its POM file
+* depends on the `io.openliberty.tools:liberty-maven-plugin` Maven plugin in its POM file
 * contains a `src/main/liberty/config/server.xml` file (or a file set making up the server configuration)
 
 The first thing the `server.xml` file must contain is a complete set of *features*. The feature set can be fine-grained
@@ -51,7 +51,12 @@ In a way this *feature set* is the starting point for reasoning about the projec
 (in particular the ones with scope `provided`) must be complete w.r.t. the enabled features, to the extent these features are
 used.
 
-For the remainder of the `server.xml` configuration, it may be desirable to consult the above-mentioned Open Liberty guides.
+For the remainder of the `server.xml` configuration, it may be desirable to consult the above-mentioned Open Liberty guides
+and/or the [Server Configuration Overview](https://openliberty.io/docs/latest/reference/config/server-configuration-overview.html).
 
-Also note how much of the (overridable) "Liberty configuration" for port, host, context root etc. is done in the POM file.
+Also note how much of the (overridable) "Liberty configuration" for port, context root etc. is done in the POM file.
+These configuration settings are set as Maven properties such as `liberty.var.http.port`, which are understood by the
+`io.openliberty.tools:liberty-maven-plugin` Maven plugin (and passed as server configuration variables to the server configuration
+files such as `server.xml`). These same properties are also passed as system properties to the
+`org.apache.maven.plugins:maven-failsafe-plugin` Maven plugin that is used for running functional (integration) tests.
 
