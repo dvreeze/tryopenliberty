@@ -16,11 +16,11 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect;
 
+import eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect.cdi.ApplicationBasePackage;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -47,7 +47,7 @@ public class IntrospectionResource {
     private final String applicationBasePackage;
 
     @Inject
-    public IntrospectionResource(@Named("applicationBasePackage") String applicationBasePackage) {
+    public IntrospectionResource(@ApplicationBasePackage String applicationBasePackage) {
         this.applicationBasePackage = applicationBasePackage;
     }
 

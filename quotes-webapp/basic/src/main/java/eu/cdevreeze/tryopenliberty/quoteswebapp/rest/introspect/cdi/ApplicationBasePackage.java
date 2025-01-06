@@ -16,22 +16,18 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect.cdi;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.Typed;
+import jakarta.inject.Qualifier;
+
+import java.lang.annotation.*;
 
 /**
- * Rather involved way of getting the application base package.
+ * Qualifier for Strings representing an application base package.
  *
  * @author Chris de Vreeze
  */
-@Dependent
-public class ApplicationBasePackageHolder {
-
-    @Produces
-    @Typed(String.class)
-    @ApplicationBasePackage
-    public String getApplicationBasePackage() {
-        return "eu.cdevreeze.tryopenliberty";
-    }
+@Qualifier
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface ApplicationBasePackage {
 }
