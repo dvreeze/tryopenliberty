@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Typed;
 
 import java.util.stream.Stream;
 
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
  *
  * @author Chris de Vreeze
  */
+@Typed({QuoteService.class})
 @ApplicationScoped
 public class QuoteServiceImpl implements QuoteService {
 
