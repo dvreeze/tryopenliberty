@@ -104,13 +104,7 @@ public class IntrospectionResource {
                                         .toList()
                         )
                 )
-                .add(
-                        "scope",
-                        Optional.ofNullable(bean.getScope())
-                                .map(Class::toString)
-                                .map(jsonProvider::createValue)
-                                .map(v -> (JsonValue) v)
-                                .orElse(JsonValue.NULL))
+                .add("scope", bean.getScope().toString()) // should never be null
                 .add(
                         "stereotypes",
                         jsonProvider.createArrayBuilder(
