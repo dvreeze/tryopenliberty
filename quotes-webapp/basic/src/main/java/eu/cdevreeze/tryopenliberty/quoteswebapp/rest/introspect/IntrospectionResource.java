@@ -17,6 +17,7 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect;
 
 import eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect.cdi.ApplicationBasePackage;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
@@ -57,7 +58,10 @@ public class IntrospectionResource {
     @Produces(MediaType.APPLICATION_JSON)
     public JsonArray findAllCdiBeans() {
         BeanManager beanManager = CDI.current().getBeanManager();
-        Set<Bean<?>> allCdiBeans = beanManager.getBeans(Object.class);
+        // This returns all CDI beans, of any type and any set of qualifiers
+        // Recall that all CDI beans (implicitly) have qualifier Any
+        // If we leave out this qualifier annotation argument, qualifier Default is assumed
+        Set<Bean<?>> allCdiBeans = beanManager.getBeans(Object.class, new Any.Literal());
         return jsonProvider
                 .createArrayBuilder(allCdiBeans.stream().map(this::convertToJson).toList())
                 .build();
@@ -68,7 +72,10 @@ public class IntrospectionResource {
     @Produces(MediaType.APPLICATION_JSON)
     public JsonArray findAllCdiBeansInApplicationCode() {
         BeanManager beanManager = CDI.current().getBeanManager();
-        Set<Bean<?>> cdiBeans = beanManager.getBeans(Object.class)
+        // This returns all CDI beans in the given namespace, of any type and any set of qualifiers
+        // Recall that all CDI beans (implicitly) have qualifier Any
+        // If we leave out this qualifier annotation argument, qualifier Default is assumed
+        Set<Bean<?>> cdiBeans = beanManager.getBeans(Object.class, new Any.Literal())
                 .stream()
                 .filter(bean ->
                         Optional.ofNullable(bean.getBeanClass().getPackage())
