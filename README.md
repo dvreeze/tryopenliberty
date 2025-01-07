@@ -28,9 +28,9 @@ everything".
 ## Project structure
 
 The Maven projects in this repository have a relatively straightforward project structure:
-1. They are to a large extent "regular" Maven Java projects
-2. In particular, they are Jakarta EE Maven projects producing a WAR file
-3. As Jakarta EE Maven projects targetting an Open Liberty application server, they contain a `server.xml` file (set)
+1. They are to a large extent "regular" *Maven Java projects*
+2. In particular, they are Jakarta EE Maven projects producing a *WAR file*
+3. As Jakarta EE Maven projects targetting an *Open Liberty* application server, they contain a `server.xml` file (or "server configuration" file set)
 
 For more information on the specifics, see the reference material mentioned above.
 

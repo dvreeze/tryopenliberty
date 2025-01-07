@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 
 /**
  * Internal introspection resource.
+ * <p>
+ * Recall that CDI performs type-safe resolution at injection points based on required type plus required qualifiers.
  *
  * @author Chris de Vreeze
  */
