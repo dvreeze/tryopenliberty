@@ -5,4 +5,5 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
        bean-discovery-mode="annotated" version="4.0">
+    <!-- bean-discovery-mode "annotated" (the default since version 4.0), to prevent the occurrence of lots of "unexpected" CDI beans -->
 </beans>
