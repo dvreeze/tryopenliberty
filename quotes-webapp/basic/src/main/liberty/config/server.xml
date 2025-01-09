@@ -4,10 +4,16 @@
         <feature>jsonb-3.0</feature>
         <feature>cdi-4.0</feature>
         <feature>mpHealth-4.0</feature>
+        <!-- See: https://openliberty.io/docs/latest/reference/feature/jdbc-4.3.html -->
+        <feature>jdbc-4.3</feature>
     </featureManager>
 
     <httpEndpoint httpPort="${http.port}" httpsPort="${https.port}"
                   id="defaultHttpEndpoint" host="*" />
 
     <webApplication location="basic.war" contextRoot="${app.context.root}"/>
+
+    <!-- "Stolen" from https://openliberty.io/guides/getting-started.html#checking-the-open-liberty-logs -->
+    <logging traceSpecification="com.ibm.ws.microprofile.health.*=all" />
+
 </server>
