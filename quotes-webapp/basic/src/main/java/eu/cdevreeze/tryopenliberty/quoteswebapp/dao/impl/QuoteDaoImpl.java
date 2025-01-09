@@ -22,6 +22,7 @@ import eu.cdevreeze.tryopenliberty.quoteswebapp.cdi.annotation.QuoteDataSource;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperations;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplate;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.TransactionalInterceptors;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementConsumer;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ResultSetFunction;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
@@ -86,7 +87,12 @@ public class QuoteDaoImpl implements QuoteDao {
             return extractQuotes(rows);
         };
         try {
-            return jdbcTemplate.query(sql, initPs, rsExtractor);
+            return jdbcTemplate.query(
+                    sql,
+                    initPs,
+                    rsExtractor,
+                    TransactionalInterceptors::inReadOnlyReadCommittedTransaction
+            );
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -16,4 +16,16 @@
     <!-- "Stolen" from https://openliberty.io/guides/getting-started.html#checking-the-open-liberty-logs -->
     <logging traceSpecification="com.ibm.ws.microprofile.health.*=all" />
 
+    <library id="jdbcLib">
+        <fileset dir="jdbc" includes="*.jar"/>
+    </library>
+
+    <dataSource jndiName="jdbc/quoteDataSource">
+        <jdbcDriver libraryRef="jdbcLib"/>
+        <connectionManager maxPoolSize="10" minPoolSize="2"/>
+        <properties.postgresql serverName="localhost" portNumber="5432"
+                               databaseName="postgres"
+                               user="postgres"
+                               password="mysecretpassword"/> <!-- TODO Hide password -->
+    </dataSource>
 </server>

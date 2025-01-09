@@ -13,6 +13,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.release>17</maven.compiler.release>
+
+    <postgresql.version>42.7.4</postgresql.version>
+
     <!-- Liberty configuration -->
     <liberty.var.http.port>9080</liberty.var.http.port>
     <liberty.var.https.port>9443</liberty.var.https.port>
@@ -39,11 +42,11 @@
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.4</version>
+            <version>${postgresql.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!-- For tests -->
         <dependency>
@@ -80,6 +83,19 @@
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
                 <version>3.11.1</version>
+                <configuration>
+                    <!-- See https://openliberty.io/docs/latest/relational-database-connections-JDBC.html -->
+                    <copyDependencies>
+                        <dependencyGroup>
+                            <location>jdbc</location>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
+                            </dependency>
+                        </dependencyGroup>
+                    </copyDependencies>
+                </configuration>
             </plugin>
             <!-- Plugin to run functional tests -->
             <plugin>

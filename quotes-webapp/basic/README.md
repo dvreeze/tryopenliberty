@@ -19,7 +19,7 @@ docker pull postgres:latest
 docker image ls
 
 # Better: docker run --name some-postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d postgres
-docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+docker run --name some-postgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 # Check the existence of this Docker container (and the port it listens on) with the following command
 docker container ls -f name=postgres
 

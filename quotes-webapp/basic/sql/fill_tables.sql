@@ -52,6 +52,9 @@ VALUES ('corrupt government');
 INSERT INTO quote_schema.subject (subject_text)
 VALUES ('hidden knowledge');
 
+INSERT INTO quote_schema.subject (subject_text)
+VALUES ('truth');
+
 -- Quotes
 
 INSERT INTO quote_schema.quote (quote_text, attributed_to)
@@ -406,3 +409,23 @@ SELECT q.id, s.id
   FROM quote_schema.quote AS q, quote_schema.subject AS s
  WHERE q.quote_text = 'The day science begins to study non-physical phenomena,\nit will make more progress in one decade than in all the previous centuries of its existence.'
    AND s.subject_text = 'hidden knowledge';
+
+
+INSERT INTO quote_schema.quote (quote_text, attributed_to)
+VALUES ('If you tell the truth, you don''t have to remember anything.', 'Mark Twain');
+
+INSERT INTO quote_schema.quote_subject (quote_id, subject_id)
+SELECT q.id, s.id
+  FROM quote_schema.quote AS q, quote_schema.subject AS s
+ WHERE q.quote_text = 'If you tell the truth, you don''t have to remember anything.'
+   AND s.subject_text = 'truth';
+
+
+INSERT INTO quote_schema.quote (quote_text, attributed_to)
+VALUES ('The secret of getting ahead is getting started.', 'Mark Twain');
+
+INSERT INTO quote_schema.quote_subject (quote_id, subject_id)
+SELECT q.id, s.id
+  FROM quote_schema.quote AS q, quote_schema.subject AS s
+ WHERE q.quote_text = 'The secret of getting ahead is getting started.'
+   AND s.subject_text = 'truth';

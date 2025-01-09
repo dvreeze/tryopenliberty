@@ -19,6 +19,7 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.*;
 
 import java.sql.SQLException;
+import java.util.function.UnaryOperator;
 
 /**
  * JDBC "operations". Somewhat inspired by Spring.
@@ -30,13 +31,20 @@ public interface JdbcOperations {
     <R> R execute(ConnectionFunction<R> connectionFunction) throws SQLException;
 
     <R> R execute(
+            ConnectionFunction<R> connectionFunction,
+            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
+    ) throws SQLException;
+
+    <R> R execute(
             PreparedStatementCreator preparedStatementCreator,
-            PreparedStatementFunction<R> statementFunction
+            PreparedStatementFunction<R> statementFunction,
+            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
     ) throws SQLException;
 
     <R> R query(
             String sql,
             PreparedStatementConsumer preparedStatementSetter,
-            ResultSetFunction<R> resultSetExtractor
+            ResultSetFunction<R> resultSetExtractor,
+            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
     ) throws SQLException;
 }

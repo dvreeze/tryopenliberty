@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.UnaryOperator;
 
 /**
  * JDBC "template", making the use of JDBC a bit easier. Somewhat inspired by Spring, but also by the JDK
@@ -51,19 +52,33 @@ public class JdbcTemplate implements JdbcOperations {
 
     @Override
     public <R> R execute(
+            ConnectionFunction<R> connectionFunction,
+            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
+    ) throws SQLException {
+        return execute(connectionInterceptor.apply(connectionFunction));
+    }
+
+    @Override
+    public <R> R execute(
             PreparedStatementCreator preparedStatementCreator,
-            PreparedStatementFunction<R> statementFunction
+            PreparedStatementFunction<R> statementFunction,
+            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
     ) throws SQLException {
         ConnectionFunction<R> connectionFunction = con -> {
             try (PreparedStatement ps = preparedStatementCreator.apply(con)) {
                 return statementFunction.apply(ps);
             }
         };
-        return execute(connectionFunction);
+        return execute(connectionFunction, connectionInterceptor);
     }
 
     @Override
-    public <R> R query(String sql, PreparedStatementConsumer preparedStatementSetter, ResultSetFunction<R> resultSetExtractor) throws SQLException {
+    public <R> R query(
+            String sql,
+            PreparedStatementConsumer preparedStatementSetter,
+            ResultSetFunction<R> resultSetExtractor,
+            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
+    ) throws SQLException {
         PreparedStatementCreator preparedStatementCreator = con -> {
             PreparedStatement ps = con.prepareStatement(sql);
             preparedStatementSetter.accept(ps);
@@ -74,6 +89,6 @@ public class JdbcTemplate implements JdbcOperations {
                 return resultSetExtractor.apply(rs);
             }
         };
-        return execute(preparedStatementCreator, statementFunction);
+        return execute(preparedStatementCreator, statementFunction, connectionInterceptor);
     }
 }
