@@ -64,9 +64,11 @@ public class TransactionalInterceptors {
     ) {
         return con -> {
             try {
-                con.setAutoCommit(false);
+                // Setting readOnly does not work (consistently) if the connection is a
+                // com.ibm.ws.rsadapter.jdbc.v43.WSJdbc43Connection.
+                // So leaving this property alone for the moment
                 con.setTransactionIsolation(isolationLevel);
-                con.setReadOnly(readOnly);
+                con.setAutoCommit(false);
                 R result = connectionFunction.apply(con);
                 con.commit();
                 return result;
