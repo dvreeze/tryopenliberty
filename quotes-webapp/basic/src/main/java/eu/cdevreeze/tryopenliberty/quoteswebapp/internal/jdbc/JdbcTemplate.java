@@ -16,9 +16,12 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.*;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -40,7 +43,7 @@ public class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public <R> R execute(JdbcFunctionalInterfaces.ConnectionFunction<R> connectionFunction) throws SQLException {
+    public <R> R execute(ConnectionFunction<R> connectionFunction) throws SQLException {
         try (Connection con = dataSource.getConnection()) {
             return connectionFunction.apply(con);
         }
@@ -48,14 +51,29 @@ public class JdbcTemplate implements JdbcOperations {
 
     @Override
     public <R> R execute(
-            JdbcFunctionalInterfaces.PreparedStatementCreator preparedStatementCreator,
-            JdbcFunctionalInterfaces.PreparedStatementFunction<R> statementFunction
+            PreparedStatementCreator preparedStatementCreator,
+            PreparedStatementFunction<R> statementFunction
     ) throws SQLException {
-        JdbcFunctionalInterfaces.ConnectionFunction<R> connectionFunction = con -> {
+        ConnectionFunction<R> connectionFunction = con -> {
             try (PreparedStatement ps = preparedStatementCreator.apply(con)) {
                 return statementFunction.apply(ps);
             }
         };
         return execute(connectionFunction);
+    }
+
+    @Override
+    public <R> R query(String sql, PreparedStatementConsumer preparedStatementSetter, ResultSetFunction<R> resultSetExtractor) throws SQLException {
+        PreparedStatementCreator preparedStatementCreator = con -> {
+            PreparedStatement ps = con.prepareStatement(sql);
+            preparedStatementSetter.accept(ps);
+            return ps;
+        };
+        PreparedStatementFunction<R> statementFunction = ps -> {
+            try (ResultSet rs = ps.executeQuery()) {
+                return resultSetExtractor.apply(rs);
+            }
+        };
+        return execute(preparedStatementCreator, statementFunction);
     }
 }

@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.*;
+
 import java.sql.SQLException;
 
 /**
@@ -25,10 +27,16 @@ import java.sql.SQLException;
  */
 public interface JdbcOperations {
 
-    <R> R execute(JdbcFunctionalInterfaces.ConnectionFunction<R> connectionFunction) throws SQLException;
+    <R> R execute(ConnectionFunction<R> connectionFunction) throws SQLException;
 
     <R> R execute(
-            JdbcFunctionalInterfaces.PreparedStatementCreator preparedStatementCreator,
-            JdbcFunctionalInterfaces.PreparedStatementFunction<R> statementFunction
+            PreparedStatementCreator preparedStatementCreator,
+            PreparedStatementFunction<R> statementFunction
+    ) throws SQLException;
+
+    <R> R query(
+            String sql,
+            PreparedStatementConsumer preparedStatementSetter,
+            ResultSetFunction<R> resultSetExtractor
     ) throws SQLException;
 }
