@@ -18,19 +18,17 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.dao.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.cdi.annotation.QuoteDataSource;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperations;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplate;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.TransactionalInterceptors;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementConsumer;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ResultSetFunction;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
-import jakarta.inject.Inject;
 
-import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,33 +43,38 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class QuoteDaoImpl implements QuoteDao {
 
-    private final JdbcOperations jdbcTemplate;
-
-    @Inject
-    public QuoteDaoImpl(@QuoteDataSource DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    @Override
+    public ConnectionFunction<ImmutableList<Quote>> findAllQuotes() {
+        return this::findAllQuotes;
     }
 
     @Override
-    public ImmutableList<Quote> findAllQuotes() {
+    public ConnectionFunction<ImmutableList<Quote>> findQuotesByAuthor(String attributedTo) {
+        return con -> findQuotesByAuthor(attributedTo, con);
+    }
+
+    @Override
+    public ConnectionFunction<ImmutableList<Quote>> findQuotesBySubject(String subject) {
+        return con -> findQuotesBySubject(subject, con);
+    }
+
+    private ImmutableList<Quote> findAllQuotes(Connection con) throws SQLException {
         PreparedStatementConsumer initPs = ps -> {
         };
-        return findQuotes(FIND_ALL_QUOTES_SQL, initPs);
+        return findQuotes(FIND_ALL_QUOTES_SQL, initPs, con);
     }
 
-    @Override
-    public ImmutableList<Quote> findQuotesByAuthor(String attributedTo) {
+    private ImmutableList<Quote> findQuotesByAuthor(String attributedTo, Connection con) throws SQLException {
         PreparedStatementConsumer initPs = ps -> ps.setString(1, attributedTo);
-        return findQuotes(FIND_QUOTES_BY_AUTHOR_SQL, initPs);
+        return findQuotes(FIND_QUOTES_BY_AUTHOR_SQL, initPs, con);
     }
 
-    @Override
-    public ImmutableList<Quote> findQuotesBySubject(String subject) {
+    private ImmutableList<Quote> findQuotesBySubject(String subject, Connection con) throws SQLException {
         PreparedStatementConsumer initPs = ps -> ps.setString(1, subject);
-        return findQuotes(FIND_QUOTES_BY_SUBJECT_SQL, initPs);
+        return findQuotes(FIND_QUOTES_BY_SUBJECT_SQL, initPs, con);
     }
 
-    private ImmutableList<Quote> findQuotes(String sql, PreparedStatementConsumer initPs) {
+    private ImmutableList<Quote> findQuotes(String sql, PreparedStatementConsumer initPs, Connection con) throws SQLException {
         ResultSetFunction<ImmutableList<Quote>> rsExtractor = rs -> {
             final List<QuoteRow> rows = new ArrayList<>();
             while (rs.next()) {
@@ -86,16 +89,8 @@ public class QuoteDaoImpl implements QuoteDao {
             }
             return extractQuotes(rows);
         };
-        try {
-            return jdbcTemplate.query(
-                    sql,
-                    initPs,
-                    rsExtractor,
-                    TransactionalInterceptors::inReadOnlyReadCommittedTransaction
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
+        return jdbcTemplateGivenConnection.query(sql, initPs, rsExtractor);
     }
 
     /**

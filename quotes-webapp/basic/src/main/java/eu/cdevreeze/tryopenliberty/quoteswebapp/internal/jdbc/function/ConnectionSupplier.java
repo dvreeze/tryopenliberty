@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
+package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
-
-import java.sql.SQLException;
-import java.util.function.UnaryOperator;
+import java.sql.Connection;
 
 /**
- * JDBC "operations". Somewhat inspired by Spring.
+ * JDBC Supplier returning a Connection.
  *
  * @author Chris de Vreeze
  */
-public interface JdbcOperations {
-
-    <R> R execute(ConnectionFunction<R> connectionFunction) throws SQLException;
-
-    <R> R execute(
-            ConnectionFunction<R> connectionFunction,
-            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
-    ) throws SQLException;
+@FunctionalInterface
+public interface ConnectionSupplier extends JdbcFunctionalInterfaces.Supplier<Connection> {
 }

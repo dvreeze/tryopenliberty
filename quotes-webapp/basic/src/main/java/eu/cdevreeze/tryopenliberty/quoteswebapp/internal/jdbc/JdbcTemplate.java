@@ -16,12 +16,10 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.*;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.UnaryOperator;
 
@@ -56,39 +54,5 @@ public class JdbcTemplate implements JdbcOperations {
             UnaryOperator<ConnectionFunction<R>> connectionInterceptor
     ) throws SQLException {
         return execute(connectionInterceptor.apply(connectionFunction));
-    }
-
-    @Override
-    public <R> R execute(
-            PreparedStatementCreator preparedStatementCreator,
-            PreparedStatementFunction<R> statementFunction,
-            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
-    ) throws SQLException {
-        ConnectionFunction<R> connectionFunction = con -> {
-            try (PreparedStatement ps = preparedStatementCreator.apply(con)) {
-                return statementFunction.apply(ps);
-            }
-        };
-        return execute(connectionFunction, connectionInterceptor);
-    }
-
-    @Override
-    public <R> R query(
-            String sql,
-            PreparedStatementConsumer preparedStatementSetter,
-            ResultSetFunction<R> resultSetExtractor,
-            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
-    ) throws SQLException {
-        PreparedStatementCreator preparedStatementCreator = con -> {
-            PreparedStatement ps = con.prepareStatement(sql);
-            preparedStatementSetter.accept(ps);
-            return ps;
-        };
-        PreparedStatementFunction<R> statementFunction = ps -> {
-            try (ResultSet rs = ps.executeQuery()) {
-                return resultSetExtractor.apply(rs);
-            }
-        };
-        return execute(preparedStatementCreator, statementFunction, connectionInterceptor);
     }
 }

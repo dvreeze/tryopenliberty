@@ -17,22 +17,25 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.dao;
 
 import com.google.common.collect.ImmutableList;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
 /**
  * Quotes DAO interface.
  * <p>
  * Unlike much example code for Open Liberty (or Jakarta EE) projects, the DAO layer is an abstract
- * Java interface. Also, the data passed and returned in the DAO methods is immutable, including
- * the collections, which are immutable Guava collections.
+ * Java interface. Also, the data passed and returned in the DAO methods is immutable, to the extent
+ * feasible.
+ * <p>
+ * Note that this DAO interface is bound to the use of JDBC.
  *
  * @author Chris de Vreeze
  */
 public interface QuoteDao {
 
-    ImmutableList<Quote> findAllQuotes();
+    ConnectionFunction<ImmutableList<Quote>> findAllQuotes();
 
-    ImmutableList<Quote> findQuotesByAuthor(String attributedTo);
+    ConnectionFunction<ImmutableList<Quote>> findQuotesByAuthor(String attributedTo);
 
-    ImmutableList<Quote> findQuotesBySubject(String subject);
+    ConnectionFunction<ImmutableList<Quote>> findQuotesBySubject(String subject);
 }
