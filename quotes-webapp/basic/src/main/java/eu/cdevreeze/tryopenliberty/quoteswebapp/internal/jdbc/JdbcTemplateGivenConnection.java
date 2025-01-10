@@ -26,6 +26,8 @@ import java.util.function.Function;
 /**
  * JDBC "template" given a Connection. It makes the use of JDBC a bit easier. Somewhat inspired by Spring, but also
  * by the JDK functional interfaces.
+ * <p>
+ * Typically, instances are very short-lived and not injected by dependency injection.
  *
  * @author Chris de Vreeze
  */

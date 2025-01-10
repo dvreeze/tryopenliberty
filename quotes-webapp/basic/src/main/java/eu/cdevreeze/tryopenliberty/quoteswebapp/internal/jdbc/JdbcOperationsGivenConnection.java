@@ -24,6 +24,8 @@ import java.util.function.Function;
 
 /**
  * JDBC "operations" given a Connection. Somewhat inspired by Spring.
+ * <p>
+ * Typically, instances are very short-lived and not injected by dependency injection.
  *
  * @author Chris de Vreeze
  */
