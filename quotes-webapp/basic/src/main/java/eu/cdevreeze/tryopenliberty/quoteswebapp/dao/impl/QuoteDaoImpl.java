@@ -143,6 +143,7 @@ public class QuoteDaoImpl implements QuoteDao {
         };
         var keys = jdbcTemplateGivenConnection.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
         Preconditions.checkArgument(keys.size() == 1);
+        Preconditions.checkArgument(!keys.get(0).isEmpty());
 
         for (String subject : subjects) {
             Consumer<PreparedStatement> psSetter2 = ps -> {
