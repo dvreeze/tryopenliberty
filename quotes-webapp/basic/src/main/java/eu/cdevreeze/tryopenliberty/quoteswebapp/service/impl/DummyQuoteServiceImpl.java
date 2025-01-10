@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.enterprise.inject.Typed;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 /**
@@ -36,9 +37,12 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class DummyQuoteServiceImpl implements QuoteService {
 
+    private final AtomicReference<ImmutableList<Quote>> quotes =
+            new AtomicReference<>(initialQuotes());
+
     @Override
     public ImmutableList<Quote> findAllQuotes() {
-        return initialQuotes();
+        return quotes.get();
     }
 
     @Override
@@ -57,7 +61,14 @@ public class DummyQuoteServiceImpl implements QuoteService {
 
     @Override
     public Quote insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects) {
-        throw new UnsupportedOperationException();
+        Quote quote = new Quote(quoteText, attributedTo, subjects);
+        quotes.updateAndGet(quoteList ->
+                ImmutableList.<Quote>builder()
+                        .addAll(quoteList)
+                        .add(quote)
+                        .build()
+        );
+        return quote;
     }
 
     private ImmutableList<Quote> initialQuotes() {
