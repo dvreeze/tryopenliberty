@@ -16,12 +16,11 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementConsumer;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementCreator;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementFunction;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ResultSetFunction;
-
-import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * JDBC "operations" given a Connection. Somewhat inspired by Spring.
@@ -30,14 +29,16 @@ import java.sql.SQLException;
  */
 public interface JdbcOperationsGivenConnection {
 
+    Connection getConnection();
+
     <R> R execute(
-            PreparedStatementCreator preparedStatementCreator,
-            PreparedStatementFunction<R> statementFunction
-    ) throws SQLException;
+            Function<Connection, PreparedStatement> preparedStatementCreator,
+            Function<PreparedStatement, R> statementFunction
+    );
 
     <R> R query(
             String sql,
-            PreparedStatementConsumer preparedStatementSetter,
-            ResultSetFunction<R> resultSetExtractor
-    ) throws SQLException;
+            Consumer<PreparedStatement> preparedStatementSetter,
+            Function<ResultSet, R> resultSetExtractor
+    );
 }

@@ -16,9 +16,8 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
-
-import java.sql.SQLException;
+import java.sql.Connection;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -28,10 +27,10 @@ import java.util.function.UnaryOperator;
  */
 public interface JdbcOperations {
 
-    <R> R execute(ConnectionFunction<R> connectionFunction) throws SQLException;
+    <R> R execute(Function<Connection, R> connectionFunction);
 
     <R> R execute(
-            ConnectionFunction<R> connectionFunction,
-            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
-    ) throws SQLException;
+            Function<Connection, R> connectionFunction,
+            UnaryOperator<Function<Connection, R>> connectionInterceptor
+    );
 }

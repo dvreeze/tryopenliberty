@@ -29,7 +29,6 @@ import jakarta.enterprise.inject.Typed;
 import jakarta.inject.Inject;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 /**
  * Quotes service implementation, adding transaction management on top of the DAO methods.
@@ -52,39 +51,27 @@ public class QuoteServiceImpl implements QuoteService {
     @Override
     public ImmutableList<Quote> findAllQuotes() {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
-        try {
-            return jdbcTemplate.execute(
-                    quoteDao.findAllQuotes(),
-                    TransactionalInterceptors::inReadOnlyReadCommittedTransaction
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return jdbcTemplate.execute(
+                quoteDao.findAllQuotes(),
+                TransactionalInterceptors::inReadOnlyReadCommittedTransaction
+        );
     }
 
     @Override
     public ImmutableList<Quote> findQuotesByAuthor(String attributedTo) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
-        try {
-            return jdbcTemplate.execute(
-                    quoteDao.findQuotesByAuthor(attributedTo),
-                    TransactionalInterceptors::inReadOnlyReadCommittedTransaction
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return jdbcTemplate.execute(
+                quoteDao.findQuotesByAuthor(attributedTo),
+                TransactionalInterceptors::inReadOnlyReadCommittedTransaction
+        );
     }
 
     @Override
     public ImmutableList<Quote> findQuotesBySubject(String subject) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
-        try {
-            return jdbcTemplate.execute(
-                    quoteDao.findQuotesBySubject(subject),
-                    TransactionalInterceptors::inReadOnlyReadCommittedTransaction
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return jdbcTemplate.execute(
+                quoteDao.findQuotesBySubject(subject),
+                TransactionalInterceptors::inReadOnlyReadCommittedTransaction
+        );
     }
 }

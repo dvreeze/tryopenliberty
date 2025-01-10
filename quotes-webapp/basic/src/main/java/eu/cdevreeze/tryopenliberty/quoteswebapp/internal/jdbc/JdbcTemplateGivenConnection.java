@@ -16,15 +16,12 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementConsumer;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementCreator;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementFunction;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ResultSetFunction;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * JDBC "template" given a Connection. It makes the use of JDBC a bit easier. Somewhat inspired by Spring, but also
@@ -41,22 +38,42 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
     }
 
     @Override
-    public <R> R execute(PreparedStatementCreator preparedStatementCreator, PreparedStatementFunction<R> statementFunction) throws SQLException {
+    public Connection getConnection() {
+        return currentConnection;
+    }
+
+    @Override
+    public <R> R execute(
+            Function<Connection, PreparedStatement> preparedStatementCreator,
+            Function<PreparedStatement, R> statementFunction
+    ) {
         try (PreparedStatement ps = preparedStatementCreator.apply(currentConnection)) {
             return statementFunction.apply(ps);
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
         }
     }
 
     @Override
-    public <R> R query(String sql, PreparedStatementConsumer preparedStatementSetter, ResultSetFunction<R> resultSetExtractor) throws SQLException {
-        PreparedStatementCreator preparedStatementCreator = con -> {
-            PreparedStatement ps = con.prepareStatement(sql);
-            preparedStatementSetter.accept(ps);
-            return ps;
+    public <R> R query(
+            String sql,
+            Consumer<PreparedStatement> preparedStatementSetter,
+            Function<ResultSet, R> resultSetExtractor
+    ) {
+        Function<Connection, PreparedStatement> preparedStatementCreator = con -> {
+            try {
+                PreparedStatement ps = con.prepareStatement(sql);
+                preparedStatementSetter.accept(ps);
+                return ps;
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            }
         };
-        PreparedStatementFunction<R> statementFunction = ps -> {
+        Function<PreparedStatement, R> statementFunction = ps -> {
             try (ResultSet rs = ps.executeQuery()) {
                 return resultSetExtractor.apply(rs);
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
             }
         };
         return execute(preparedStatementCreator, statementFunction);

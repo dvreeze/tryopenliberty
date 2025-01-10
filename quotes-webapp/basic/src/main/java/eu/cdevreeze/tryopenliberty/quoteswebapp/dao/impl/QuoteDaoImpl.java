@@ -21,17 +21,19 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.PreparedStatementConsumer;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ResultSetFunction;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.UncheckedSQLException;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -44,50 +46,66 @@ import java.util.stream.Collectors;
 public class QuoteDaoImpl implements QuoteDao {
 
     @Override
-    public ConnectionFunction<ImmutableList<Quote>> findAllQuotes() {
+    public Function<Connection, ImmutableList<Quote>> findAllQuotes() {
         return this::findAllQuotes;
     }
 
     @Override
-    public ConnectionFunction<ImmutableList<Quote>> findQuotesByAuthor(String attributedTo) {
+    public Function<Connection, ImmutableList<Quote>> findQuotesByAuthor(String attributedTo) {
         return con -> findQuotesByAuthor(attributedTo, con);
     }
 
     @Override
-    public ConnectionFunction<ImmutableList<Quote>> findQuotesBySubject(String subject) {
+    public Function<Connection, ImmutableList<Quote>> findQuotesBySubject(String subject) {
         return con -> findQuotesBySubject(subject, con);
     }
 
-    private ImmutableList<Quote> findAllQuotes(Connection con) throws SQLException {
-        PreparedStatementConsumer initPs = ps -> {
+    private ImmutableList<Quote> findAllQuotes(Connection con) {
+        Consumer<PreparedStatement> initPs = ps -> {
         };
         return findQuotes(FIND_ALL_QUOTES_SQL, initPs, con);
     }
 
-    private ImmutableList<Quote> findQuotesByAuthor(String attributedTo, Connection con) throws SQLException {
-        PreparedStatementConsumer initPs = ps -> ps.setString(1, attributedTo);
+    private ImmutableList<Quote> findQuotesByAuthor(String attributedTo, Connection con) {
+        Consumer<PreparedStatement> initPs = ps -> {
+            try {
+                ps.setString(1, attributedTo);
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            }
+        };
         return findQuotes(FIND_QUOTES_BY_AUTHOR_SQL, initPs, con);
     }
 
-    private ImmutableList<Quote> findQuotesBySubject(String subject, Connection con) throws SQLException {
-        PreparedStatementConsumer initPs = ps -> ps.setString(1, subject);
+    private ImmutableList<Quote> findQuotesBySubject(String subject, Connection con) {
+        Consumer<PreparedStatement> initPs = ps -> {
+            try {
+                ps.setString(1, subject);
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            }
+        };
         return findQuotes(FIND_QUOTES_BY_SUBJECT_SQL, initPs, con);
     }
 
-    private ImmutableList<Quote> findQuotes(String sql, PreparedStatementConsumer initPs, Connection con) throws SQLException {
-        ResultSetFunction<ImmutableList<Quote>> rsExtractor = rs -> {
-            final List<QuoteRow> rows = new ArrayList<>();
-            while (rs.next()) {
-                rows.add(
-                        new QuoteRow(
-                                rs.getLong("quote_id"),
-                                rs.getString("quote_text"),
-                                rs.getString("attributed_to"),
-                                rs.getString("subject_text")
-                        )
-                );
+    private ImmutableList<Quote> findQuotes(String sql, Consumer<PreparedStatement> initPs, Connection con) {
+        Function<ResultSet, ImmutableList<Quote>> rsExtractor = rs -> {
+            try {
+                final List<QuoteRow> rows = new ArrayList<>();
+                while (rs.next()) {
+                    rows.add(
+                            new QuoteRow(
+                                    rs.getLong("quote_id"),
+                                    rs.getString("quote_text"),
+                                    rs.getString("attributed_to"),
+                                    rs.getString("subject_text")
+                            )
+                    );
+                }
+                return extractQuotes(rows);
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
             }
-            return extractQuotes(rows);
         };
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
         return jdbcTemplateGivenConnection.query(sql, initPs, rsExtractor);

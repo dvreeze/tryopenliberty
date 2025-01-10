@@ -17,8 +17,10 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.dao;
 
 import com.google.common.collect.ImmutableList;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
+
+import java.sql.Connection;
+import java.util.function.Function;
 
 /**
  * Quotes DAO interface.
@@ -33,9 +35,9 @@ import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
  */
 public interface QuoteDao {
 
-    ConnectionFunction<ImmutableList<Quote>> findAllQuotes();
+    Function<Connection, ImmutableList<Quote>> findAllQuotes();
 
-    ConnectionFunction<ImmutableList<Quote>> findQuotesByAuthor(String attributedTo);
+    Function<Connection, ImmutableList<Quote>> findQuotesByAuthor(String attributedTo);
 
-    ConnectionFunction<ImmutableList<Quote>> findQuotesBySubject(String subject);
+    Function<Connection, ImmutableList<Quote>> findQuotesBySubject(String subject);
 }

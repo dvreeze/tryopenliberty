@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function;
+package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * JDBC Function taking a ResultSet.
+ * Unchecked wrapper exception containing a SQLException as root cause.
  *
  * @author Chris de Vreeze
  */
-@FunctionalInterface
-public interface ResultSetFunction<R> extends JdbcFunctionalInterfaces.Function<ResultSet, R> {
+public class UncheckedSQLException extends RuntimeException {
+
+    public UncheckedSQLException(SQLException rootCause) {
+        super(rootCause);
+    }
 }

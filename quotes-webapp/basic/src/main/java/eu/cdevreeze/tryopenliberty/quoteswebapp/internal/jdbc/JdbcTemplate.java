@@ -16,11 +16,10 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -42,17 +41,19 @@ public class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public <R> R execute(ConnectionFunction<R> connectionFunction) throws SQLException {
+    public <R> R execute(Function<Connection, R> connectionFunction) {
         try (Connection con = dataSource.getConnection()) {
             return connectionFunction.apply(con);
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
         }
     }
 
     @Override
     public <R> R execute(
-            ConnectionFunction<R> connectionFunction,
-            UnaryOperator<ConnectionFunction<R>> connectionInterceptor
-    ) throws SQLException {
+            Function<Connection, R> connectionFunction,
+            UnaryOperator<Function<Connection, R>> connectionInterceptor
+    ) {
         return execute(connectionInterceptor.apply(connectionFunction));
     }
 }

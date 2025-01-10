@@ -16,10 +16,9 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.function.ConnectionFunction;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Function;
 
 /**
  * Transactional interceptors, for JDBC local database transactions only.
@@ -31,34 +30,34 @@ public class TransactionalInterceptors {
     private TransactionalInterceptors() {
     }
 
-    public static <R> ConnectionFunction<R> inTransaction(
-            ConnectionFunction<R> connectionFunction,
+    public static <R> Function<Connection, R> inTransaction(
+            Function<Connection, R> connectionFunction,
             int isolationLevel
     ) {
         return inTransaction(connectionFunction, isolationLevel, false);
     }
 
-    public static <R> ConnectionFunction<R> inReadOnlyTransaction(
-            ConnectionFunction<R> connectionFunction,
+    public static <R> Function<Connection, R> inReadOnlyTransaction(
+            Function<Connection, R> connectionFunction,
             int isolationLevel
     ) {
         return inTransaction(connectionFunction, isolationLevel, true);
     }
 
-    public static <R> ConnectionFunction<R> inReadCommittedTransaction(
-            ConnectionFunction<R> connectionFunction
+    public static <R> Function<Connection, R> inReadCommittedTransaction(
+            Function<Connection, R> connectionFunction
     ) {
         return inTransaction(connectionFunction, Connection.TRANSACTION_READ_COMMITTED);
     }
 
-    public static <R> ConnectionFunction<R> inReadOnlyReadCommittedTransaction(
-            ConnectionFunction<R> connectionFunction
+    public static <R> Function<Connection, R> inReadOnlyReadCommittedTransaction(
+            Function<Connection, R> connectionFunction
     ) {
         return inReadOnlyTransaction(connectionFunction, Connection.TRANSACTION_READ_COMMITTED);
     }
 
-    private static <R> ConnectionFunction<R> inTransaction(
-            ConnectionFunction<R> connectionFunction,
+    private static <R> Function<Connection, R> inTransaction(
+            Function<Connection, R> connectionFunction,
             int isolationLevel,
             boolean readOnly
     ) {
@@ -72,10 +71,21 @@ public class TransactionalInterceptors {
                 R result = connectionFunction.apply(con);
                 con.commit();
                 return result;
-            } catch (SQLException | RuntimeException e) {
-                con.rollback();
+            } catch (SQLException e) {
+                rollback(con);
+                throw new UncheckedSQLException(e);
+            } catch (RuntimeException e) {
+                rollback(con);
                 throw e;
             }
         };
+    }
+
+    private static void rollback(Connection con) {
+        try {
+            con.rollback();
+        } catch (SQLException ex) {
+            throw new UncheckedSQLException(ex);
+        }
     }
 }
