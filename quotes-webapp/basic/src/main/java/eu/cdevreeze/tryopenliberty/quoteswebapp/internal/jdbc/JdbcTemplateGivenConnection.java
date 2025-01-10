@@ -16,12 +16,18 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * JDBC "template" given a Connection. It makes the use of JDBC a bit easier. Somewhat inspired by Spring, but also
@@ -47,10 +53,10 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
     @Override
     public <R> R execute(
             Function<Connection, PreparedStatement> preparedStatementCreator,
-            Function<PreparedStatement, R> statementFunction
+            Function<PreparedStatement, R> preparedStatementFunction
     ) {
         try (PreparedStatement ps = preparedStatementCreator.apply(currentConnection)) {
-            return statementFunction.apply(ps);
+            return preparedStatementFunction.apply(ps);
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         }
@@ -71,13 +77,86 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
                 throw new UncheckedSQLException(e);
             }
         };
-        Function<PreparedStatement, R> statementFunction = ps -> {
+        Function<PreparedStatement, R> preparedStatementFunction = ps -> {
             try (ResultSet rs = ps.executeQuery()) {
                 return resultSetExtractor.apply(rs);
             } catch (SQLException e) {
                 throw new UncheckedSQLException(e);
             }
         };
-        return execute(preparedStatementCreator, statementFunction);
+        return execute(preparedStatementCreator, preparedStatementFunction);
+    }
+
+    @Override
+    public int update(Function<Connection, PreparedStatement> preparedStatementCreator) {
+        try (PreparedStatement ps = preparedStatementCreator.apply(currentConnection)) {
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
+    }
+
+    @Override
+    public int update(String sql, Consumer<PreparedStatement> preparedStatementSetter) {
+        Function<Connection, PreparedStatement> preparedStatementCreator = con -> {
+            try {
+                PreparedStatement ps = con.prepareStatement(sql);
+                preparedStatementSetter.accept(ps);
+                return ps;
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            }
+        };
+        return update(preparedStatementCreator);
+    }
+
+    @Override
+    public ImmutableList<ImmutableMap<String, Object>> updateReturningKeys(
+            String sql,
+            Consumer<PreparedStatement> preparedStatementSetter
+    ) {
+        try (PreparedStatement ps = currentConnection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatementSetter.accept(ps);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+
+            ResultSetMetaData rsMetaData = Objects.requireNonNull(rs.getMetaData());
+            int columnCount = rsMetaData.getColumnCount();
+
+            List<String> columnNames = IntStream.rangeClosed(1, columnCount)
+                    .mapToObj(colIndex -> getColumnName(rsMetaData, colIndex))
+                    .toList();
+
+            List<ImmutableMap<String, Object>> rows = new ArrayList<>();
+
+            while (rs.next()) {
+                Map<String, Object> row = IntStream.rangeClosed(1, columnCount)
+                        .mapToObj(colIndex -> Map.entry(columnNames.get(colIndex - 1), getObject(rs, colIndex)))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                rows.add(ImmutableMap.copyOf(row));
+            }
+
+            return ImmutableList.copyOf(rows);
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
+    }
+
+    private String getColumnName(ResultSetMetaData rsMetaData, int index) {
+        try {
+            return rsMetaData.getColumnName(index);
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
+    }
+
+    private Object getObject(ResultSet rs, int columnIndex) {
+        try {
+            return rs.getObject(columnIndex);
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
     }
 }

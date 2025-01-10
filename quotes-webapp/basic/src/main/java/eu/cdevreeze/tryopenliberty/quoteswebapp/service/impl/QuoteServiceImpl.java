@@ -17,6 +17,7 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.service.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.cdi.annotation.QuoteDataSource;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperations;
@@ -72,6 +73,15 @@ public class QuoteServiceImpl implements QuoteService {
         return jdbcTemplate.execute(
                 quoteDao.findQuotesBySubject(subject),
                 TransactionalInterceptors::inReadOnlyReadCommittedTransaction
+        );
+    }
+
+    @Override
+    public Quote insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects) {
+        JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
+        return jdbcTemplate.execute(
+                quoteDao.insertQuote(quoteText, attributedTo, subjects),
+                TransactionalInterceptors::inReadCommittedTransaction
         );
     }
 }

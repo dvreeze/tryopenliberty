@@ -16,14 +16,11 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest;
 
+import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
 import jakarta.inject.Inject;
-import jakarta.json.spi.JsonProvider;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
 /**
@@ -35,8 +32,6 @@ import jakarta.ws.rs.core.MediaType;
  */
 @Path("quotes")
 public class QuotesResource {
-
-    private static final JsonProvider jsonProvider = JsonProvider.provider();
 
     private final QuoteService quoteService;
 
@@ -66,5 +61,12 @@ public class QuotesResource {
     public QuoteList.JsonbProxy findQuotesBySubject(@PathParam("subject") String subject) {
         QuoteList quoteList = new QuoteList(quoteService.findQuotesBySubject(subject));
         return quoteList.toJsonbProxy();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void insertQuote(Quote.JsonbProxy quote) {
+        Quote qt = Quote.fromJsonbProxy(quote);
+        quoteService.insertQuote(qt.quoteText(), qt.attributedTo(), qt.subjects());
     }
 }

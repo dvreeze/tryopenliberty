@@ -429,3 +429,13 @@ SELECT q.id, s.id
   FROM quote_schema.quote AS q, quote_schema.subject AS s
  WHERE q.quote_text = 'The secret of getting ahead is getting started.'
    AND s.subject_text = 'truth';
+
+
+INSERT INTO quote_schema.quote (quote_text, attributed_to)
+VALUES ('The man with a new idea is a crank until the idea succeeds.', 'Mark Twain');
+
+INSERT INTO quote_schema.quote_subject (quote_id, subject_id)
+SELECT q.id, s.id
+  FROM quote_schema.quote AS q, quote_schema.subject AS s
+ WHERE q.quote_text = 'The man with a new idea is a crank until the idea succeeds.'
+   AND s.subject_text = 'truth';

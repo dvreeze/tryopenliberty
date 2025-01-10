@@ -14,7 +14,8 @@
     <webApplication location="basic.war" contextRoot="${app.context.root}"/>
 
     <!-- "Stolen" from https://openliberty.io/guides/getting-started.html#checking-the-open-liberty-logs -->
-    <logging traceSpecification="com.ibm.ws.microprofile.health.*=all" />
+    <!-- <logging traceSpecification="com.ibm.ws.microprofile.health.*=all" /> -->
+    <logging traceSpecification="*=info:RRA=all:org.postgresql=all" />
 
     <library id="jdbcLib">
         <fileset dir="jdbc" includes="*.jar"/>

@@ -16,15 +16,18 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.dao.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.UncheckedSQLException;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
+import jakarta.inject.Inject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,6 +48,13 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class QuoteDaoImpl implements QuoteDao {
 
+    private final SubjectDao subjectDao;
+
+    @Inject
+    public QuoteDaoImpl(SubjectDao subjectDao) {
+        this.subjectDao = subjectDao;
+    }
+
     @Override
     public Function<Connection, ImmutableList<Quote>> findAllQuotes() {
         return this::findAllQuotes;
@@ -58,6 +68,11 @@ public class QuoteDaoImpl implements QuoteDao {
     @Override
     public Function<Connection, ImmutableList<Quote>> findQuotesBySubject(String subject) {
         return con -> findQuotesBySubject(subject, con);
+    }
+
+    @Override
+    public Function<Connection, Quote> insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects) {
+        return con -> insertQuote(quoteText, attributedTo, subjects, con);
     }
 
     private ImmutableList<Quote> findAllQuotes(Connection con) {
@@ -109,6 +124,39 @@ public class QuoteDaoImpl implements QuoteDao {
         };
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
         return jdbcTemplateGivenConnection.query(sql, initPs, rsExtractor);
+    }
+
+    private Quote insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects, Connection con) {
+        for (String subject : subjects) {
+            subjectDao.insertSubjectIfAbsent(subject).accept(con);
+        }
+
+        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
+
+        Consumer<PreparedStatement> psSetter1 = ps -> {
+            try {
+                ps.setString(1, quoteText);
+                ps.setString(2, attributedTo);
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            }
+        };
+        var keys = jdbcTemplateGivenConnection.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
+        Preconditions.checkArgument(keys.size() == 1);
+
+        for (String subject : subjects) {
+            Consumer<PreparedStatement> psSetter2 = ps -> {
+                try {
+                    ps.setString(1, quoteText);
+                    ps.setString(2, subject);
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                }
+            };
+            jdbcTemplateGivenConnection.update(INSERT_QUOTE_SUBJECT_SQL, psSetter2);
+        }
+
+        return new Quote(quoteText, attributedTo, subjects);
     }
 
     /**
@@ -166,4 +214,17 @@ public class QuoteDaoImpl implements QuoteDao {
                       LEFT OUTER JOIN quote_schema.subject AS s
                         ON qs.subject_id = s.id
                      WHERE s.subject_text = ?""";
+
+    private static final String INSERT_QUOTE_SQL =
+            """
+                    INSERT INTO quote_schema.quote (quote_text, attributed_to)
+                    VALUES (?, ?)""";
+
+    private static final String INSERT_QUOTE_SUBJECT_SQL =
+            """
+                    INSERT INTO quote_schema.quote_subject (quote_id, subject_id)
+                     SELECT q.id, s.id
+                       FROM quote_schema.quote AS q, quote_schema.subject AS s
+                      WHERE q.quote_text = ?
+                        AND s.subject_text = ?""";
 }

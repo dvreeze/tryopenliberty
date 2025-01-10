@@ -19,6 +19,7 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -55,5 +56,19 @@ public class JdbcTemplate implements JdbcOperations {
             UnaryOperator<Function<Connection, R>> connectionInterceptor
     ) {
         return execute(connectionInterceptor.apply(connectionFunction));
+    }
+
+    @Override
+    public void execute(Consumer<Connection> connectionConsumer) {
+        try (Connection con = dataSource.getConnection()) {
+            connectionConsumer.accept(con);
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
+    }
+
+    @Override
+    public void execute(Consumer<Connection> connectionConsumer, UnaryOperator<Consumer<Connection>> connectionInterceptor) {
+        execute(connectionInterceptor.apply(connectionConsumer));
     }
 }

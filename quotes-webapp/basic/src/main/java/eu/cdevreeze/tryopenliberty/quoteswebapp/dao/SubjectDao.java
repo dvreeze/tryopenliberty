@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
+package eu.cdevreeze.tryopenliberty.quoteswebapp.dao;
+
+import com.google.common.collect.ImmutableSet;
 
 import java.sql.Connection;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
- * JDBC "operations". Somewhat inspired by Spring.
+ * Subject DAO interface.
+ * <p>
+ * Unlike much example code for Open Liberty (or Jakarta EE) projects, the DAO layer is an abstract
+ * Java interface. Also, the data passed and returned in the DAO methods is immutable, to the extent
+ * feasible.
+ * <p>
+ * Note that this DAO interface is bound to the use of JDBC.
  *
  * @author Chris de Vreeze
  */
-public interface JdbcOperations {
+public interface SubjectDao {
 
-    <R> R execute(Function<Connection, R> connectionFunction);
+    Function<Connection, ImmutableSet<String>> findAllSubjects();
 
-    <R> R execute(
-            Function<Connection, R> connectionFunction,
-            UnaryOperator<Function<Connection, R>> connectionInterceptor
-    );
-
-    void execute(Consumer<Connection> connectionConsumer);
-
-    void execute(
-            Consumer<Connection> connectionConsumer,
-            UnaryOperator<Consumer<Connection>> connectionInterceptor
-    );
+    Consumer<Connection> insertSubjectIfAbsent(String subject);
 }

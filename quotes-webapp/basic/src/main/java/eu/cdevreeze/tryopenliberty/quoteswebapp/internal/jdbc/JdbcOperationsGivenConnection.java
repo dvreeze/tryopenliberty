@@ -16,6 +16,9 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,12 +38,30 @@ public interface JdbcOperationsGivenConnection {
 
     <R> R execute(
             Function<Connection, PreparedStatement> preparedStatementCreator,
-            Function<PreparedStatement, R> statementFunction
+            Function<PreparedStatement, R> preparedStatementFunction
     );
 
     <R> R query(
             String sql,
             Consumer<PreparedStatement> preparedStatementSetter,
             Function<ResultSet, R> resultSetExtractor
+    );
+
+    /**
+     * Issues a SQL insert, update or delete statement, retfldIndexurning the number of rows affected
+     */
+    int update(Function<Connection, PreparedStatement> preparedStatementCreator);
+
+    /**
+     * Issues a SQL insert, update or delete statement, returning the number of rows affected
+     */
+    int update(String sql, Consumer<PreparedStatement> preparedStatementSetter);
+
+    /**
+     * Issues a SQL insert, update or delete statement, returning the generated keys
+     */
+    ImmutableList<ImmutableMap<String, Object>> updateReturningKeys(
+            String sql,
+            Consumer<PreparedStatement> preparedStatementSetter
     );
 }

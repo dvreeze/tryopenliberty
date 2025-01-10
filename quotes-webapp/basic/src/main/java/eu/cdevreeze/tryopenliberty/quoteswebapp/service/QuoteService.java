@@ -17,6 +17,7 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.service;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
 /**
@@ -35,4 +36,10 @@ public interface QuoteService {
     ImmutableList<Quote> findQuotesByAuthor(String attributedTo);
 
     ImmutableList<Quote> findQuotesBySubject(String subject);
+
+    Quote insertQuote(
+            String quoteText,
+            String attributedTo,
+            ImmutableSet<String> subjects
+    );
 }

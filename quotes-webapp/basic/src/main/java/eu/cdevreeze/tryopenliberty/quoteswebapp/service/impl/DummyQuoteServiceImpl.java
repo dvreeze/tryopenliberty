@@ -55,6 +55,11 @@ public class DummyQuoteServiceImpl implements QuoteService {
                 .collect(ImmutableList.toImmutableList());
     }
 
+    @Override
+    public Quote insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects) {
+        throw new UnsupportedOperationException();
+    }
+
     private ImmutableList<Quote> initialQuotes() {
         return Stream.of(
                         new Quote(

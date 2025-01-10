@@ -17,6 +17,7 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.dao;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
 import java.sql.Connection;
@@ -40,4 +41,10 @@ public interface QuoteDao {
     Function<Connection, ImmutableList<Quote>> findQuotesByAuthor(String attributedTo);
 
     Function<Connection, ImmutableList<Quote>> findQuotesBySubject(String subject);
+
+    Function<Connection, Quote> insertQuote(
+            String quoteText,
+            String attributedTo,
+            ImmutableSet<String> subjects
+    );
 }
