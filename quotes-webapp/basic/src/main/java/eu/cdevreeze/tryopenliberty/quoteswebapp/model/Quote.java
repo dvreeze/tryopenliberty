@@ -43,6 +43,10 @@ public record Quote(
         ImmutableSet<String> subjects
 ) {
 
+    public QuoteData toQuoteData() {
+        return new QuoteData(quoteText(), attributedTo(), subjects());
+    }
+
     public JsonbProxy toJsonbProxy() {
         var jsonbProxy = new JsonbProxy();
         jsonbProxy.setQuoteId(quoteId());

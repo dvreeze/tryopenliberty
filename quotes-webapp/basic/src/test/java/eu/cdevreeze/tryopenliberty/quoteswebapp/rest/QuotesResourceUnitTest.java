@@ -19,6 +19,7 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.rest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteData;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.impl.DummyQuoteServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -136,5 +137,50 @@ public class QuotesResourceUnitTest {
         );
 
         assertTrue(quotes.stream().anyMatch(quote -> quote.equals(anExpectedQuote)));
+    }
+
+    @Test
+    public void testInsertQuote() {
+        var quoteService = new DummyQuoteServiceImpl();
+        var quotesResource = new QuotesResource(quoteService);
+
+        int numberOfQuotes = quoteService.findAllQuotes().size();
+
+        QuoteData quoteData = new QuoteData(
+                "Interfaces are great",
+                "Chris",
+                ImmutableSet.of("Java truth")
+        );
+
+        quotesResource.insertQuote(quoteData.toJsonbProxy());
+
+        assertEquals(1 + numberOfQuotes, quoteService.findAllQuotes().size());
+
+        assertTrue(quoteService.findAllQuotes().stream().anyMatch(quote -> quote.toQuoteData().equals(quoteData)));
+    }
+
+    @Test
+    public void testDeleteQuote() {
+        var quoteService = new DummyQuoteServiceImpl();
+        var quotesResource = new QuotesResource(quoteService);
+
+        long quoteId = 19;
+
+        int numberOfQuotes = quoteService.findAllQuotes().size();
+
+        Quote anExpectedQuote = new Quote(
+                quoteId,
+                "Genius is patience",
+                "Isaac Newton",
+                ImmutableSet.of("genius")
+        );
+
+        assertTrue(quoteService.findAllQuotes().stream().anyMatch(quote -> quote.equals(anExpectedQuote)));
+
+        quotesResource.deleteQuote(quoteId);
+
+        assertEquals(numberOfQuotes - 1, quoteService.findAllQuotes().size());
+
+        assertFalse(quoteService.findAllQuotes().stream().anyMatch(quote -> quote.equals(anExpectedQuote)));
     }
 }
