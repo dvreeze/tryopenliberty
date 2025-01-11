@@ -34,7 +34,7 @@ import java.sql.Connection;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.transaction.TransactionalInterceptors.inTransaction;
+import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.transaction.TransactionalInterceptors.transactional;
 
 /**
  * Quotes service implementation, adding transaction management on top of the DAO methods.
@@ -58,7 +58,7 @@ public class QuoteServiceImpl implements QuoteService {
     public ImmutableList<Quote> findAllQuotes() {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
-                inTransaction(
+                transactional(
                         TransactionConfig.TRANSACTION_READ_COMMITTED.makeReadOnly(),
                         quoteDao.findAllQuotes()
                 )
@@ -69,7 +69,7 @@ public class QuoteServiceImpl implements QuoteService {
     public Optional<Quote> findQuoteById(long quoteId) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
-                inTransaction(
+                transactional(
                         TransactionConfig.TRANSACTION_READ_COMMITTED.makeReadOnly(),
                         quoteDao.findQuoteById(quoteId)
                 )
@@ -80,7 +80,7 @@ public class QuoteServiceImpl implements QuoteService {
     public ImmutableList<Quote> findQuotesByAuthor(String attributedTo) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
-                inTransaction(
+                transactional(
                         TransactionConfig.TRANSACTION_READ_COMMITTED.makeReadOnly(),
                         quoteDao.findQuotesByAuthor(attributedTo)
                 )
@@ -91,7 +91,7 @@ public class QuoteServiceImpl implements QuoteService {
     public ImmutableList<Quote> findQuotesBySubject(String subject) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
-                inTransaction(
+                transactional(
                         TransactionConfig.TRANSACTION_READ_COMMITTED.makeReadOnly(),
                         quoteDao.findQuotesBySubject(subject)
                 )
@@ -102,7 +102,7 @@ public class QuoteServiceImpl implements QuoteService {
     public Quote insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
-                inTransaction(
+                transactional(
                         TransactionConfig.TRANSACTION_READ_COMMITTED,
                         quoteDao.insertQuote(quoteText, attributedTo, subjects)
                 )
@@ -117,7 +117,7 @@ public class QuoteServiceImpl implements QuoteService {
             return null;
         };
         jdbcTemplate.execute(
-                inTransaction(TransactionConfig.TRANSACTION_READ_COMMITTED, action)
+                transactional(TransactionConfig.TRANSACTION_READ_COMMITTED, action)
         );
     }
 }

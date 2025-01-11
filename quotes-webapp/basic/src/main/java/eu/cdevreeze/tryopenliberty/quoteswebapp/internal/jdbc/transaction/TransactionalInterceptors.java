@@ -32,7 +32,7 @@ public class TransactionalInterceptors {
     private TransactionalInterceptors() {
     }
 
-    public static <R> Function<Connection, R> inTransaction(
+    public static <R> Function<Connection, R> transactional(
             TransactionConfig transactionConfig,
             Function<Connection, R> connectionFunction
     ) {
