@@ -40,11 +40,11 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.SQLExceptio
  *
  * @author Chris de Vreeze
  */
-public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnection {
+public class JdbcConnectionTemplate implements JdbcConnectionOperations {
 
     private final Connection currentConnection;
 
-    public JdbcTemplateGivenConnection(Connection currentConnection) {
+    public JdbcConnectionTemplate(Connection currentConnection) {
         this.currentConnection = currentConnection;
     }
 

@@ -32,7 +32,7 @@ import java.util.function.Function;
  *
  * @author Chris de Vreeze
  */
-public interface JdbcOperationsGivenConnection {
+public interface JdbcConnectionOperations {
 
     Connection getConnection();
 

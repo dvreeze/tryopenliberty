@@ -18,8 +18,8 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.dao.impl;
 
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionOperations;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionTemplate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
 
@@ -68,22 +68,22 @@ public class SubjectDaoImpl implements SubjectDao {
                     }
                     return ImmutableSet.copyOf(rows);
                 });
-        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
-        return jdbcTemplateGivenConnection.query(FIND_ALL_SUBJECTS_SQL, initPs, rsExtractor);
+        JdbcConnectionOperations jdbcConnectionTemplate = new JdbcConnectionTemplate(con);
+        return jdbcConnectionTemplate.query(FIND_ALL_SUBJECTS_SQL, initPs, rsExtractor);
     }
 
     private void insertSubjectIfAbsent(String subject, Connection con) {
         Consumer<PreparedStatement> preparedStatementSetter =
                 throwingUncheckedSQLException((PreparedStatement ps) -> ps.setString(1, subject));
-        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
-        jdbcTemplateGivenConnection.update(INSERT_SUBJECT_SQL, preparedStatementSetter);
+        JdbcConnectionOperations jdbcConnectionTemplate = new JdbcConnectionTemplate(con);
+        jdbcConnectionTemplate.update(INSERT_SUBJECT_SQL, preparedStatementSetter);
     }
 
     private void deleteSubjectById(long subjectId, Connection con) {
         Consumer<PreparedStatement> preparedStatementSetter =
                 throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, subjectId));
-        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
-        jdbcTemplateGivenConnection.update(DELETE_SUBJECT_BY_ID_SQL, preparedStatementSetter);
+        JdbcConnectionOperations jdbcConnectionTemplate = new JdbcConnectionTemplate(con);
+        jdbcConnectionTemplate.update(DELETE_SUBJECT_BY_ID_SQL, preparedStatementSetter);
     }
 
     private static final String FIND_ALL_SUBJECTS_SQL =

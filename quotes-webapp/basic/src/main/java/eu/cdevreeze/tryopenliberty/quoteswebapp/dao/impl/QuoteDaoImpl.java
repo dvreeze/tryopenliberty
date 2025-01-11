@@ -22,8 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionOperations;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionTemplate;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
@@ -128,8 +128,8 @@ public class QuoteDaoImpl implements QuoteDao {
                     }
                     return extractQuotes(rows);
                 });
-        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
-        return jdbcTemplateGivenConnection.query(sql, initPs, rsExtractor);
+        JdbcConnectionOperations jdbcConnectionTemplate = new JdbcConnectionTemplate(con);
+        return jdbcConnectionTemplate.query(sql, initPs, rsExtractor);
     }
 
     private Quote insertQuote(String quoteText, String attributedTo, ImmutableSet<String> subjects, Connection con) {
@@ -137,7 +137,7 @@ public class QuoteDaoImpl implements QuoteDao {
             subjectDao.insertSubjectIfAbsent(subject).accept(con);
         }
 
-        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
+        JdbcConnectionOperations jdbcConnectionTemplate = new JdbcConnectionTemplate(con);
 
         Consumer<PreparedStatement> psSetter1 =
                 throwingUncheckedSQLException((PreparedStatement ps) -> {
@@ -145,7 +145,7 @@ public class QuoteDaoImpl implements QuoteDao {
                     ps.setString(2, attributedTo);
                 });
         ImmutableList<ImmutableMap<String, Object>> keys =
-                jdbcTemplateGivenConnection.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
+                jdbcConnectionTemplate.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
         Preconditions.checkArgument(keys.size() == 1);
         Preconditions.checkArgument(!keys.get(0).isEmpty());
         Preconditions.checkArgument(keys.get(0).containsKey("id"));
@@ -158,22 +158,22 @@ public class QuoteDaoImpl implements QuoteDao {
                         ps.setString(1, quoteText);
                         ps.setString(2, subject);
                     });
-            jdbcTemplateGivenConnection.update(INSERT_QUOTE_SUBJECT_SQL, psSetter2);
+            jdbcConnectionTemplate.update(INSERT_QUOTE_SUBJECT_SQL, psSetter2);
         }
 
         return new Quote(quoteId, quoteText, attributedTo, subjects);
     }
 
     private void deleteQuoteById(long quoteId, Connection con) {
-        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
+        JdbcConnectionOperations jdbcConnectionTemplate = new JdbcConnectionTemplate(con);
 
         Consumer<PreparedStatement> psSetter1 =
                 throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, quoteId));
-        jdbcTemplateGivenConnection.update(DELETE_QUOTE_SUBJECTS_SQL, psSetter1);
+        jdbcConnectionTemplate.update(DELETE_QUOTE_SUBJECTS_SQL, psSetter1);
 
         Consumer<PreparedStatement> psSetter2 =
                 throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, quoteId));
-        jdbcTemplateGivenConnection.update(DELETE_QUOTE_BY_ID_SQL, psSetter2);
+        jdbcConnectionTemplate.update(DELETE_QUOTE_BY_ID_SQL, psSetter2);
     }
 
     /**
