@@ -20,18 +20,18 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.UncheckedSQLException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcFunctions.throwingUncheckedSQLException;
 
 /**
  * Subject DAO implementation.
@@ -55,29 +55,23 @@ public class SubjectDaoImpl implements SubjectDao {
     private ImmutableSet<String> findAllSubjects(Connection con) {
         Consumer<PreparedStatement> initPs = ps -> {
         };
-        Function<ResultSet, ImmutableSet<String>> rsExtractor = rs -> {
-            try {
-                final List<String> rows = new ArrayList<>();
-                while (rs.next()) {
-                    rows.add(rs.getString("subject_text"));
-                }
-                return ImmutableSet.copyOf(rows);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Function<ResultSet, ImmutableSet<String>> rsExtractor =
+                throwingUncheckedSQLException((ResultSet rs) -> {
+                    final List<String> rows = new ArrayList<>();
+                    while (rs.next()) {
+                        rows.add(rs.getString("subject_text"));
+                    }
+                    return ImmutableSet.copyOf(rows);
+                });
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
         return jdbcTemplateGivenConnection.query(FIND_ALL_SUBJECTS_SQL, initPs, rsExtractor);
     }
 
     private void insertSubjectIfAbsent(String subject, Connection con) {
-        Consumer<PreparedStatement> preparedStatementSetter = ps -> {
-            try {
-                ps.setString(1, subject);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Consumer<PreparedStatement> preparedStatementSetter =
+                throwingUncheckedSQLException((PreparedStatement ps) -> {
+                    ps.setString(1, subject);
+                });
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
         jdbcTemplateGivenConnection.update(INSERT_SUBJECT_SQL, preparedStatementSetter);
     }

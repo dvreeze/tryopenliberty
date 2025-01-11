@@ -23,7 +23,6 @@ import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperationsGivenConnection;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplateGivenConnection;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.UncheckedSQLException;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Typed;
@@ -32,12 +31,13 @@ import jakarta.inject.Inject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcFunctions.throwingUncheckedSQLException;
 
 /**
  * Quotes DAO implementation.
@@ -82,46 +82,37 @@ public class QuoteDaoImpl implements QuoteDao {
     }
 
     private ImmutableList<Quote> findQuotesByAuthor(String attributedTo, Connection con) {
-        Consumer<PreparedStatement> initPs = ps -> {
-            try {
-                ps.setString(1, attributedTo);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Consumer<PreparedStatement> initPs =
+                throwingUncheckedSQLException((PreparedStatement ps) -> {
+                    ps.setString(1, attributedTo);
+                });
         return findQuotes(FIND_QUOTES_BY_AUTHOR_SQL, initPs, con);
     }
 
     private ImmutableList<Quote> findQuotesBySubject(String subject, Connection con) {
-        Consumer<PreparedStatement> initPs = ps -> {
-            try {
-                ps.setString(1, subject);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Consumer<PreparedStatement> initPs =
+                throwingUncheckedSQLException((PreparedStatement ps) -> {
+                    ps.setString(1, subject);
+                });
         return findQuotes(FIND_QUOTES_BY_SUBJECT_SQL, initPs, con);
     }
 
     private ImmutableList<Quote> findQuotes(String sql, Consumer<PreparedStatement> initPs, Connection con) {
-        Function<ResultSet, ImmutableList<Quote>> rsExtractor = rs -> {
-            try {
-                final List<QuoteRow> rows = new ArrayList<>();
-                while (rs.next()) {
-                    rows.add(
-                            new QuoteRow(
-                                    rs.getLong("quote_id"),
-                                    rs.getString("quote_text"),
-                                    rs.getString("attributed_to"),
-                                    rs.getString("subject_text")
-                            )
-                    );
-                }
-                return extractQuotes(rows);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Function<ResultSet, ImmutableList<Quote>> rsExtractor =
+                throwingUncheckedSQLException((ResultSet rs) -> {
+                    final List<QuoteRow> rows = new ArrayList<>();
+                    while (rs.next()) {
+                        rows.add(
+                                new QuoteRow(
+                                        rs.getLong("quote_id"),
+                                        rs.getString("quote_text"),
+                                        rs.getString("attributed_to"),
+                                        rs.getString("subject_text")
+                                )
+                        );
+                    }
+                    return extractQuotes(rows);
+                });
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
         return jdbcTemplateGivenConnection.query(sql, initPs, rsExtractor);
     }
@@ -133,27 +124,21 @@ public class QuoteDaoImpl implements QuoteDao {
 
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
 
-        Consumer<PreparedStatement> psSetter1 = ps -> {
-            try {
-                ps.setString(1, quoteText);
-                ps.setString(2, attributedTo);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Consumer<PreparedStatement> psSetter1 =
+                throwingUncheckedSQLException((PreparedStatement ps) -> {
+                    ps.setString(1, quoteText);
+                    ps.setString(2, attributedTo);
+                });
         var keys = jdbcTemplateGivenConnection.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
         Preconditions.checkArgument(keys.size() == 1);
         Preconditions.checkArgument(!keys.get(0).isEmpty());
 
         for (String subject : subjects) {
-            Consumer<PreparedStatement> psSetter2 = ps -> {
-                try {
-                    ps.setString(1, quoteText);
-                    ps.setString(2, subject);
-                } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
-                }
-            };
+            Consumer<PreparedStatement> psSetter2 =
+                    throwingUncheckedSQLException((PreparedStatement ps) -> {
+                        ps.setString(1, quoteText);
+                        ps.setString(2, subject);
+                    });
             jdbcTemplateGivenConnection.update(INSERT_QUOTE_SUBJECT_SQL, psSetter2);
         }
 

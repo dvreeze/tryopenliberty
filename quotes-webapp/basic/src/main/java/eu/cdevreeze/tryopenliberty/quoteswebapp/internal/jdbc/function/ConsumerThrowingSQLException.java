@@ -20,7 +20,7 @@ import java.sql.SQLException;
 
 /**
  * Consumer throwing a SQLException. Do not use this interface directly in user code,
- * but use it under the hood to wrap SQLException into UncheckedSQLException.
+ * but use it under the hood with class JdbcFunctions to wrap SQLException into UncheckedSQLException.
  *
  * @author Chris de Vreeze
  */

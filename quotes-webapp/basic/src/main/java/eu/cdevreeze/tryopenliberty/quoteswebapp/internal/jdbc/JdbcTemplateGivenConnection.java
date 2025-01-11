@@ -143,18 +143,16 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
     }
 
     private String getColumnName(ResultSetMetaData rsMetaData, int index) {
-        try {
-            return rsMetaData.getColumnName(index);
-        } catch (SQLException e) {
-            throw new UncheckedSQLException(e);
-        }
+        Supplier<String> resultSupplier = throwingUncheckedSQLException(() ->
+                rsMetaData.getColumnName(index)
+        );
+        return resultSupplier.get();
     }
 
     private Object getObject(ResultSet rs, int columnIndex) {
-        try {
-            return rs.getObject(columnIndex);
-        } catch (SQLException e) {
-            throw new UncheckedSQLException(e);
-        }
+        Supplier<Object> resultSupplier = throwingUncheckedSQLException(() ->
+                rs.getObject(columnIndex)
+        );
+        return resultSupplier.get();
     }
 }
