@@ -73,6 +73,13 @@
             <version>3.0.4</version>
             <scope>test</scope>
         </dependency>
+        <!-- Testing against in-memory JAX-RS container -->
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-inmemory</artifactId>
+            <version>3.1.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
