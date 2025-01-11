@@ -24,6 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.enterprise.inject.Typed;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -44,6 +45,13 @@ public class DummyQuoteServiceImpl implements QuoteService {
     @Override
     public ImmutableList<Quote> findAllQuotes() {
         return quotes.get();
+    }
+
+    @Override
+    public Optional<Quote> findQuoteById(long quoteId) {
+        return findAllQuotes().stream()
+                .filter(q -> q.quoteId() == quoteId)
+                .findFirst();
     }
 
     @Override

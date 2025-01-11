@@ -31,6 +31,7 @@ import jakarta.inject.Inject;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -56,6 +57,15 @@ public class QuoteServiceImpl implements QuoteService {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
                 quoteDao.findAllQuotes(),
+                TransactionalInterceptors::inReadOnlyReadCommittedTransaction
+        );
+    }
+
+    @Override
+    public Optional<Quote> findQuoteById(long quoteId) {
+        JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
+        return jdbcTemplate.execute(
+                quoteDao.findQuoteById(quoteId),
                 TransactionalInterceptors::inReadOnlyReadCommittedTransaction
         );
     }

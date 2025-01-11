@@ -79,6 +79,45 @@ public class QuotesResourceIntegrationTest {
     }
 
     @Test
+    public void testFindQuoteById() {
+        URI uri = createUri("quotes-app", "quotes/quoteId/19");
+
+        try (Client client = ClientBuilder.newClient();
+             Response response = client.target(uri).request().get()) {
+
+            assertEquals(
+                    Response.Status.OK.getStatusCode(),
+                    response.getStatus(),
+                    "Incorrect response code from " + uri);
+
+            assertEquals(
+                    MediaType.APPLICATION_JSON_TYPE,
+                    response.getMediaType(),
+                    "Incorrect media type from " + uri);
+
+            String jsonString = response.readEntity(String.class);
+            QuoteList quoteList = QuoteList.fromJsonbProxy(jsonb.fromJson(jsonString, QuoteList.JsonbProxy.class));
+            ImmutableList<Quote> quotes = quoteList.quotes();
+
+            assertFalse(quotes.isEmpty());
+
+            assertEquals(
+                    Set.of("Isaac Newton"),
+                    quotes.stream().map(Quote::attributedTo).collect(Collectors.toSet())
+            );
+
+            Quote anExpectedQuote = new Quote(
+                    19L,
+                    "Genius is patience",
+                    "Isaac Newton",
+                    ImmutableSet.of("genius")
+            );
+
+            assertTrue(quotes.stream().anyMatch(quote -> quote.equals(anExpectedQuote)));
+        }
+    }
+
+    @Test
     public void testFindQuotesByAuthor() {
         URI uri = createUri("quotes-app", "quotes/attributedTo/Wim Hof");
 

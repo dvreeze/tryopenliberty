@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest;
 
+import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteData;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
@@ -44,6 +45,17 @@ public class QuotesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public QuoteList.JsonbProxy findAllQuotes() {
         QuoteList quoteList = new QuoteList(quoteService.findAllQuotes());
+        return quoteList.toJsonbProxy();
+    }
+
+    @GET
+    @Path("/quoteId/{quoteId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public QuoteList.JsonbProxy findQuoteById(@PathParam("quoteId") long quoteId) {
+        QuoteList quoteList =
+                new QuoteList(
+                        quoteService.findQuoteById(quoteId).stream().collect(ImmutableList.toImmutableList())
+                );
         return quoteList.toJsonbProxy();
     }
 

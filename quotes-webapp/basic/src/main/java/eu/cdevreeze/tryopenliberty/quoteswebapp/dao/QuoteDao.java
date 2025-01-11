@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
 import java.sql.Connection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -38,6 +39,8 @@ import java.util.function.Function;
 public interface QuoteDao {
 
     Function<Connection, ImmutableList<Quote>> findAllQuotes();
+
+    Function<Connection, Optional<Quote>> findQuoteById(long quoteId);
 
     Function<Connection, ImmutableList<Quote>> findQuotesByAuthor(String attributedTo);
 

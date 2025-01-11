@@ -20,6 +20,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
+import java.util.Optional;
+
 /**
  * Quotes service interface.
  * <p>
@@ -32,6 +34,8 @@ import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 public interface QuoteService {
 
     ImmutableList<Quote> findAllQuotes();
+
+    Optional<Quote> findQuoteById(long quoteId);
 
     ImmutableList<Quote> findQuotesByAuthor(String attributedTo);
 

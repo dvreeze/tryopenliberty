@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -63,6 +64,11 @@ public class QuoteDaoImpl implements QuoteDao {
     }
 
     @Override
+    public Function<Connection, Optional<Quote>> findQuoteById(long quoteId) {
+        return con -> findQuoteById(quoteId, con);
+    }
+
+    @Override
     public Function<Connection, ImmutableList<Quote>> findQuotesByAuthor(String attributedTo) {
         return con -> findQuotesByAuthor(attributedTo, con);
     }
@@ -88,19 +94,21 @@ public class QuoteDaoImpl implements QuoteDao {
         return findQuotes(FIND_ALL_QUOTES_SQL, initPs, con);
     }
 
+    private Optional<Quote> findQuoteById(long quoteId, Connection con) {
+        Consumer<PreparedStatement> initPs =
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, quoteId));
+        return findQuotes(FIND_QUOTE_BY_ID_SQL, initPs, con).stream().findFirst();
+    }
+
     private ImmutableList<Quote> findQuotesByAuthor(String attributedTo, Connection con) {
         Consumer<PreparedStatement> initPs =
-                throwingUncheckedSQLException((PreparedStatement ps) -> {
-                    ps.setString(1, attributedTo);
-                });
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setString(1, attributedTo));
         return findQuotes(FIND_QUOTES_BY_AUTHOR_SQL, initPs, con);
     }
 
     private ImmutableList<Quote> findQuotesBySubject(String subject, Connection con) {
         Consumer<PreparedStatement> initPs =
-                throwingUncheckedSQLException((PreparedStatement ps) -> {
-                    ps.setString(1, subject);
-                });
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setString(1, subject));
         return findQuotes(FIND_QUOTES_BY_SUBJECT_SQL, initPs, con);
     }
 
@@ -204,6 +212,16 @@ public class QuoteDaoImpl implements QuoteDao {
                         ON q.id = qs.quote_id
                       LEFT OUTER JOIN quote_schema.subject AS s
                         ON qs.subject_id = s.id""";
+
+    private static final String FIND_QUOTE_BY_ID_SQL =
+            """
+                    SELECT q.id AS quote_id, s.id as subject_id, q.quote_text, q.attributed_to, s.subject_text
+                      FROM quote_schema.quote AS q
+                      LEFT OUTER JOIN quote_schema.quote_subject AS qs
+                        ON q.id = qs.quote_id
+                      LEFT OUTER JOIN quote_schema.subject AS s
+                        ON qs.subject_id = s.id
+                     WHERE q.id = ?""";
 
     private static final String FIND_QUOTES_BY_AUTHOR_SQL =
             """
