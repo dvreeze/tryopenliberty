@@ -21,8 +21,6 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.impl.DummyQuoteServiceImpl;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -41,8 +39,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Chris de Vreeze
  */
 public class QuotesResourceUnitTest {
-
-    private static final Jsonb jsonb = JsonbBuilder.create();
 
     @Test
     public void testFindAllQuotes() {
