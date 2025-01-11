@@ -38,4 +38,6 @@ public interface SubjectDao {
     Function<Connection, ImmutableSet<String>> findAllSubjects();
 
     Consumer<Connection> insertSubjectIfAbsent(String subject);
+
+    Consumer<Connection> deleteSubjectById(long quoteId);
 }

@@ -69,4 +69,10 @@ public class QuotesResource {
         Quote qt = Quote.fromJsonbProxy(quote);
         quoteService.insertQuote(qt.quoteText(), qt.attributedTo(), qt.subjects());
     }
+
+    @DELETE
+    @Path("/{quoteId}")
+    public void deleteQuote(@PathParam("quoteId") long quoteId) {
+        quoteService.deleteQuoteById(quoteId);
+    }
 }

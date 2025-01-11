@@ -52,6 +52,11 @@ public class SubjectDaoImpl implements SubjectDao {
         return con -> insertSubjectIfAbsent(subject, con);
     }
 
+    @Override
+    public Consumer<Connection> deleteSubjectById(long quoteId) {
+        return null;
+    }
+
     private ImmutableSet<String> findAllSubjects(Connection con) {
         Consumer<PreparedStatement> initPs = ps -> {
         };
@@ -69,11 +74,16 @@ public class SubjectDaoImpl implements SubjectDao {
 
     private void insertSubjectIfAbsent(String subject, Connection con) {
         Consumer<PreparedStatement> preparedStatementSetter =
-                throwingUncheckedSQLException((PreparedStatement ps) -> {
-                    ps.setString(1, subject);
-                });
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setString(1, subject));
         JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
         jdbcTemplateGivenConnection.update(INSERT_SUBJECT_SQL, preparedStatementSetter);
+    }
+
+    private void deleteSubjectById(long subjectId, Connection con) {
+        Consumer<PreparedStatement> preparedStatementSetter =
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, subjectId));
+        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
+        jdbcTemplateGivenConnection.update(DELETE_SUBJECT_BY_ID_SQL, preparedStatementSetter);
     }
 
     private static final String FIND_ALL_SUBJECTS_SQL =
@@ -84,4 +94,7 @@ public class SubjectDaoImpl implements SubjectDao {
                     INSERT INTO quote_schema.subject (subject_text)
                     VALUES (?)
                     ON CONFLICT DO NOTHING""";
+
+    private static final String DELETE_SUBJECT_BY_ID_SQL =
+            "DELETE FROM quote_schema.subject WHERE id = ?";
 }

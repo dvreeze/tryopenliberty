@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
 import java.sql.Connection;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -47,4 +48,6 @@ public interface QuoteDao {
             String attributedTo,
             ImmutableSet<String> subjects
     );
+
+    Consumer<Connection> deleteQuoteById(long quoteId);
 }

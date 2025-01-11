@@ -71,6 +71,18 @@ public class DummyQuoteServiceImpl implements QuoteService {
         return quote;
     }
 
+    @Override
+    public void deleteQuoteById(long quoteId) {
+        // Id is 0-based index into the collection
+        quotes.updateAndGet(quoteList -> {
+            Quote quote = quoteList.get((int) quoteId);
+            return quoteList
+                    .stream()
+                    .filter(qt -> !qt.equals(quote))
+                    .collect(ImmutableList.toImmutableList());
+        });
+    }
+
     private ImmutableList<Quote> initialQuotes() {
         return Stream.of(
                         new Quote(

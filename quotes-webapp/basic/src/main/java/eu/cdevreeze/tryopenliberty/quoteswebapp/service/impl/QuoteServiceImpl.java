@@ -30,6 +30,8 @@ import jakarta.enterprise.inject.Typed;
 import jakarta.inject.Inject;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.util.function.Function;
 
 /**
  * Quotes service implementation, adding transaction management on top of the DAO methods.
@@ -81,6 +83,19 @@ public class QuoteServiceImpl implements QuoteService {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         return jdbcTemplate.execute(
                 quoteDao.insertQuote(quoteText, attributedTo, subjects),
+                TransactionalInterceptors::inReadCommittedTransaction
+        );
+    }
+
+    @Override
+    public void deleteQuoteById(long quoteId) {
+        JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
+        Function<Connection, Object> action = con -> {
+            quoteDao.deleteQuoteById(quoteId);
+            return null;
+        };
+        jdbcTemplate.execute(
+                action,
                 TransactionalInterceptors::inReadCommittedTransaction
         );
     }

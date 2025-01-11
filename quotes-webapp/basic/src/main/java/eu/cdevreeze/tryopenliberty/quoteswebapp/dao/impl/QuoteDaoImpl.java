@@ -75,6 +75,11 @@ public class QuoteDaoImpl implements QuoteDao {
         return con -> insertQuote(quoteText, attributedTo, subjects, con);
     }
 
+    @Override
+    public Consumer<Connection> deleteQuoteById(long quoteId) {
+        return con -> deleteQuoteById(quoteId, con);
+    }
+
     private ImmutableList<Quote> findAllQuotes(Connection con) {
         Consumer<PreparedStatement> initPs = ps -> {
         };
@@ -145,6 +150,18 @@ public class QuoteDaoImpl implements QuoteDao {
         return new Quote(quoteText, attributedTo, subjects);
     }
 
+    private void deleteQuoteById(long quoteId, Connection con) {
+        JdbcOperationsGivenConnection jdbcTemplateGivenConnection = new JdbcTemplateGivenConnection(con);
+
+        Consumer<PreparedStatement> psSetter1 =
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, quoteId));
+        jdbcTemplateGivenConnection.update(DELETE_QUOTE_SUBJECTS_SQL, psSetter1);
+
+        Consumer<PreparedStatement> psSetter2 =
+                throwingUncheckedSQLException((PreparedStatement ps) -> ps.setLong(1, quoteId));
+        jdbcTemplateGivenConnection.update(DELETE_QUOTE_BY_ID_SQL, psSetter2);
+    }
+
     /**
      * Row for a quote and one of its subjects
      */
@@ -213,4 +230,12 @@ public class QuoteDaoImpl implements QuoteDao {
                        FROM quote_schema.quote AS q, quote_schema.subject AS s
                       WHERE q.quote_text = ?
                         AND s.subject_text = ?""";
+
+    private static final String DELETE_QUOTE_SUBJECTS_SQL =
+            """
+                    DELETE FROM quote_schema.quote_subject WHERE quote_id = ?""";
+
+    private static final String DELETE_QUOTE_BY_ID_SQL =
+            """
+                    DELETE FROM quote_schema.quote WHERE id = ?""";
 }

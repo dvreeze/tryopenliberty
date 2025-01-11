@@ -42,4 +42,6 @@ public interface QuoteService {
             String attributedTo,
             ImmutableSet<String> subjects
     );
+
+    void deleteQuoteById(long quoteId);
 }
