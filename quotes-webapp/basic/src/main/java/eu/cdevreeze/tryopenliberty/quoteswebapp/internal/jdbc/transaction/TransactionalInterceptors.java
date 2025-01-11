@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
+package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.transaction;
+
+import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.UncheckedSQLException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,42 +33,15 @@ public class TransactionalInterceptors {
     }
 
     public static <R> Function<Connection, R> inTransaction(
-            Function<Connection, R> connectionFunction,
-            int isolationLevel
-    ) {
-        return inTransaction(connectionFunction, isolationLevel, false);
-    }
-
-    public static <R> Function<Connection, R> inReadOnlyTransaction(
-            Function<Connection, R> connectionFunction,
-            int isolationLevel
-    ) {
-        return inTransaction(connectionFunction, isolationLevel, true);
-    }
-
-    public static <R> Function<Connection, R> inReadCommittedTransaction(
+            TransactionConfig transactionConfig,
             Function<Connection, R> connectionFunction
-    ) {
-        return inTransaction(connectionFunction, Connection.TRANSACTION_READ_COMMITTED);
-    }
-
-    public static <R> Function<Connection, R> inReadOnlyReadCommittedTransaction(
-            Function<Connection, R> connectionFunction
-    ) {
-        return inReadOnlyTransaction(connectionFunction, Connection.TRANSACTION_READ_COMMITTED);
-    }
-
-    private static <R> Function<Connection, R> inTransaction(
-            Function<Connection, R> connectionFunction,
-            int isolationLevel,
-            boolean readOnly
     ) {
         return con -> {
             try {
                 // Setting readOnly does not work (consistently) if the connection is a
                 // com.ibm.ws.rsadapter.jdbc.v43.WSJdbc43Connection.
                 // So leaving this property alone for the moment
-                con.setTransactionIsolation(isolationLevel);
+                con.setTransactionIsolation(transactionConfig.isolationLevel().getIsolationLevelConstant());
                 con.setAutoCommit(false);
                 R result = connectionFunction.apply(con);
                 con.commit();
