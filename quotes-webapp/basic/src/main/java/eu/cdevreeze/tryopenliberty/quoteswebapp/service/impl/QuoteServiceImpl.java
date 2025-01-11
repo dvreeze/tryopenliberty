@@ -91,7 +91,7 @@ public class QuoteServiceImpl implements QuoteService {
     public void deleteQuoteById(long quoteId) {
         JdbcOperations jdbcTemplate = new JdbcTemplate(dataSource);
         Function<Connection, Object> action = con -> {
-            quoteDao.deleteQuoteById(quoteId);
+            quoteDao.deleteQuoteById(quoteId).accept(con);
             return null;
         };
         jdbcTemplate.execute(

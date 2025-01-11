@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest;
 
-import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteData;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
 import jakarta.inject.Inject;
@@ -65,8 +65,8 @@ public class QuotesResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void insertQuote(Quote.JsonbProxy quote) {
-        Quote qt = Quote.fromJsonbProxy(quote);
+    public void insertQuote(QuoteData.JsonbProxy quote) {
+        QuoteData qt = QuoteData.fromJsonbProxy(quote);
         quoteService.insertQuote(qt.quoteText(), qt.attributedTo(), qt.subjects());
     }
 

@@ -53,8 +53,8 @@ public class SubjectDaoImpl implements SubjectDao {
     }
 
     @Override
-    public Consumer<Connection> deleteSubjectById(long quoteId) {
-        return null;
+    public Consumer<Connection> deleteSubjectById(long subjectId) {
+        return con -> deleteSubjectById(subjectId, con);
     }
 
     private ImmutableSet<String> findAllSubjects(Connection con) {

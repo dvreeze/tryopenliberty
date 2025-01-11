@@ -18,6 +18,7 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.dao.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
@@ -33,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -134,9 +136,13 @@ public class QuoteDaoImpl implements QuoteDao {
                     ps.setString(1, quoteText);
                     ps.setString(2, attributedTo);
                 });
-        var keys = jdbcTemplateGivenConnection.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
+        ImmutableList<ImmutableMap<String, Object>> keys =
+                jdbcTemplateGivenConnection.updateReturningKeys(INSERT_QUOTE_SQL, psSetter1);
         Preconditions.checkArgument(keys.size() == 1);
         Preconditions.checkArgument(!keys.get(0).isEmpty());
+        Preconditions.checkArgument(keys.get(0).containsKey("id"));
+
+        long quoteId = Long.parseLong(Objects.requireNonNull(keys.get(0).get("id")).toString());
 
         for (String subject : subjects) {
             Consumer<PreparedStatement> psSetter2 =
@@ -147,7 +153,7 @@ public class QuoteDaoImpl implements QuoteDao {
             jdbcTemplateGivenConnection.update(INSERT_QUOTE_SUBJECT_SQL, psSetter2);
         }
 
-        return new Quote(quoteText, attributedTo, subjects);
+        return new Quote(quoteId, quoteText, attributedTo, subjects);
     }
 
     private void deleteQuoteById(long quoteId, Connection con) {
@@ -181,6 +187,7 @@ public class QuoteDaoImpl implements QuoteDao {
                 .stream()
                 .map(rowGroup ->
                         new Quote(
+                                rowGroup.get(0).quoteId(),
                                 rowGroup.get(0).quoteText(),
                                 rowGroup.get(0).attributedTo(),
                                 rowGroup.stream().map(QuoteRow::subject).collect(ImmutableSet.toImmutableSet())

@@ -68,6 +68,7 @@ public class QuotesResourceIntegrationTest {
             assertFalse(quotes.isEmpty());
 
             Quote anExpectedQuote = new Quote(
+                    1L,
                     "If you can learn how to use your mind, anything is possible.",
                     "Wim Hof",
                     ImmutableSet.of("inner strength")
@@ -106,6 +107,7 @@ public class QuotesResourceIntegrationTest {
             );
 
             Quote anExpectedQuote = new Quote(
+                    1L,
                     "If you can learn how to use your mind, anything is possible.",
                     "Wim Hof",
                     ImmutableSet.of("inner strength")
@@ -143,6 +145,7 @@ public class QuotesResourceIntegrationTest {
             );
 
             Quote anExpectedQuote = new Quote(
+                    28L,
                     "We now have the technology to bring ET home.",
                     "Ben Rich",
                     ImmutableSet.of("hidden knowledge")

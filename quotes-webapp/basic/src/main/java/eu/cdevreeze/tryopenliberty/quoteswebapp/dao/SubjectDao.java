@@ -39,5 +39,5 @@ public interface SubjectDao {
 
     Consumer<Connection> insertSubjectIfAbsent(String subject);
 
-    Consumer<Connection> deleteSubjectById(long quoteId);
+    Consumer<Connection> deleteSubjectById(long subjectId);
 }

@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 /**
- * Immutable thread-safe Quote record.
+ * Immutable thread-safe Quote record, without the ID.
  * <p>
  * In principle Java records can be used with Jsonb, although there are some limitations.
  * See <a href="https://carloschac.in/2020/04/20/java-records-jsonb/">Java records Jsonb</a> for more
@@ -36,8 +36,7 @@ import java.util.Set;
  *
  * @author Chris de Vreeze
  */
-public record Quote(
-        long quoteId,
+public record QuoteData(
         String quoteText,
         String attributedTo,
         ImmutableSet<String> subjects
@@ -45,16 +44,14 @@ public record Quote(
 
     public JsonbProxy toJsonbProxy() {
         var jsonbProxy = new JsonbProxy();
-        jsonbProxy.setQuoteId(quoteId());
         jsonbProxy.setQuoteText(quoteText());
         jsonbProxy.setAttributedTo(attributedTo());
         jsonbProxy.setSubjects(Set.copyOf(subjects()));
         return jsonbProxy;
     }
 
-    public static Quote fromJsonbProxy(JsonbProxy jsonbProxy) {
-        return new Quote(
-                jsonbProxy.getQuoteId(),
+    public static QuoteData fromJsonbProxy(JsonbProxy jsonbProxy) {
+        return new QuoteData(
                 jsonbProxy.getQuoteText(),
                 jsonbProxy.getAttributedTo(),
                 ImmutableSet.copyOf(jsonbProxy.getSubjects())
@@ -63,18 +60,9 @@ public record Quote(
 
     public static final class JsonbProxy {
 
-        private long quoteId;
         private String quoteText;
         private String attributedTo;
         private Set<String> subjects;
-
-        public long getQuoteId() {
-            return quoteId;
-        }
-
-        public void setQuoteId(long quoteId) {
-            this.quoteId = quoteId;
-        }
 
         public String getQuoteText() {
             return quoteText;
