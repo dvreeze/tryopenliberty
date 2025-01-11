@@ -26,8 +26,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcFunctions.throwingUncheckedSQLException;
 
 /**
  * JDBC "template" given a Connection. It makes the use of JDBC a bit easier. Somewhat inspired by Spring, but also
@@ -68,22 +71,18 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
             Consumer<PreparedStatement> preparedStatementSetter,
             Function<ResultSet, R> resultSetExtractor
     ) {
-        Function<Connection, PreparedStatement> preparedStatementCreator = con -> {
-            try {
-                PreparedStatement ps = con.prepareStatement(sql);
-                preparedStatementSetter.accept(ps);
-                return ps;
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
-        Function<PreparedStatement, R> preparedStatementFunction = ps -> {
-            try (ResultSet rs = ps.executeQuery()) {
-                return resultSetExtractor.apply(rs);
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Function<Connection, PreparedStatement> preparedStatementCreator =
+                throwingUncheckedSQLException((Connection con) -> {
+                    PreparedStatement ps = con.prepareStatement(sql);
+                    preparedStatementSetter.accept(ps);
+                    return ps;
+                });
+        Function<PreparedStatement, R> preparedStatementFunction =
+                throwingUncheckedSQLException((PreparedStatement ps) -> {
+                    try (ResultSet rs = ps.executeQuery()) {
+                        return resultSetExtractor.apply(rs);
+                    }
+                });
         return execute(preparedStatementCreator, preparedStatementFunction);
     }
 
@@ -98,15 +97,12 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
 
     @Override
     public int update(String sql, Consumer<PreparedStatement> preparedStatementSetter) {
-        Function<Connection, PreparedStatement> preparedStatementCreator = con -> {
-            try {
-                PreparedStatement ps = con.prepareStatement(sql);
-                preparedStatementSetter.accept(ps);
-                return ps;
-            } catch (SQLException e) {
-                throw new UncheckedSQLException(e);
-            }
-        };
+        Function<Connection, PreparedStatement> preparedStatementCreator =
+                throwingUncheckedSQLException((Connection con) -> {
+                    PreparedStatement ps = con.prepareStatement(sql);
+                    preparedStatementSetter.accept(ps);
+                    return ps;
+                });
         return update(preparedStatementCreator);
     }
 
@@ -115,33 +111,35 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
             String sql,
             Consumer<PreparedStatement> preparedStatementSetter
     ) {
-        try (PreparedStatement ps = currentConnection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatementSetter.accept(ps);
+        Supplier<ImmutableList<ImmutableMap<String, Object>>> resultSupplier =
+                throwingUncheckedSQLException(() -> {
+                    try (PreparedStatement ps = currentConnection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                        preparedStatementSetter.accept(ps);
 
-            ps.executeUpdate();
+                        ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
+                        ResultSet rs = ps.getGeneratedKeys();
 
-            ResultSetMetaData rsMetaData = Objects.requireNonNull(rs.getMetaData());
-            int columnCount = rsMetaData.getColumnCount();
+                        ResultSetMetaData rsMetaData = Objects.requireNonNull(rs.getMetaData());
+                        int columnCount = rsMetaData.getColumnCount();
 
-            List<String> columnNames = IntStream.rangeClosed(1, columnCount)
-                    .mapToObj(colIndex -> getColumnName(rsMetaData, colIndex))
-                    .toList();
+                        List<String> columnNames = IntStream.rangeClosed(1, columnCount)
+                                .mapToObj(colIndex -> getColumnName(rsMetaData, colIndex))
+                                .toList();
 
-            List<ImmutableMap<String, Object>> rows = new ArrayList<>();
+                        List<ImmutableMap<String, Object>> rows = new ArrayList<>();
 
-            while (rs.next()) {
-                Map<String, Object> row = IntStream.rangeClosed(1, columnCount)
-                        .mapToObj(colIndex -> Map.entry(columnNames.get(colIndex - 1), getObject(rs, colIndex)))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                rows.add(ImmutableMap.copyOf(row));
-            }
+                        while (rs.next()) {
+                            Map<String, Object> row = IntStream.rangeClosed(1, columnCount)
+                                    .mapToObj(colIndex -> Map.entry(columnNames.get(colIndex - 1), getObject(rs, colIndex)))
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                            rows.add(ImmutableMap.copyOf(row));
+                        }
 
-            return ImmutableList.copyOf(rows);
-        } catch (SQLException e) {
-            throw new UncheckedSQLException(e);
-        }
+                        return ImmutableList.copyOf(rows);
+                    }
+                });
+        return resultSupplier.get();
     }
 
     private String getColumnName(ResultSetMetaData rsMetaData, int index) {
