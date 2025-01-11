@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcFunctions.throwingUncheckedSQLException;
+import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.SQLExceptionUtil.throwingUncheckedSQLException;
 
 /**
  * Subject DAO implementation.

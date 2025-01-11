@@ -26,9 +26,9 @@ import java.util.function.*;
  *
  * @author Chris de Vreeze
  */
-public class JdbcFunctions {
+public class SQLExceptionUtil {
 
-    private JdbcFunctions() {
+    private SQLExceptionUtil() {
     }
 
     public static <T, R> Function<T, R> throwingUncheckedSQLException(FunctionThrowingSQLException<T, R> f) {
