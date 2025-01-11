@@ -118,25 +118,25 @@ public class JdbcTemplateGivenConnection implements JdbcOperationsGivenConnectio
 
                         ps.executeUpdate();
 
-                        ResultSet rs = ps.getGeneratedKeys();
+                        try (ResultSet rs = ps.getGeneratedKeys()) {
+                            ResultSetMetaData rsMetaData = Objects.requireNonNull(rs.getMetaData());
+                            int columnCount = rsMetaData.getColumnCount();
 
-                        ResultSetMetaData rsMetaData = Objects.requireNonNull(rs.getMetaData());
-                        int columnCount = rsMetaData.getColumnCount();
+                            List<String> columnNames = IntStream.rangeClosed(1, columnCount)
+                                    .mapToObj(colIndex -> getColumnName(rsMetaData, colIndex))
+                                    .toList();
 
-                        List<String> columnNames = IntStream.rangeClosed(1, columnCount)
-                                .mapToObj(colIndex -> getColumnName(rsMetaData, colIndex))
-                                .toList();
+                            List<ImmutableMap<String, Object>> rows = new ArrayList<>();
 
-                        List<ImmutableMap<String, Object>> rows = new ArrayList<>();
+                            while (rs.next()) {
+                                Map<String, Object> row = IntStream.rangeClosed(1, columnCount)
+                                        .mapToObj(colIndex -> Map.entry(columnNames.get(colIndex - 1), getObject(rs, colIndex)))
+                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                                rows.add(ImmutableMap.copyOf(row));
+                            }
 
-                        while (rs.next()) {
-                            Map<String, Object> row = IntStream.rangeClosed(1, columnCount)
-                                    .mapToObj(colIndex -> Map.entry(columnNames.get(colIndex - 1), getObject(rs, colIndex)))
-                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                            rows.add(ImmutableMap.copyOf(row));
+                            return ImmutableList.copyOf(rows);
                         }
-
-                        return ImmutableList.copyOf(rows);
                     }
                 });
         return resultSupplier.get();
