@@ -48,7 +48,7 @@ public interface JdbcOperationsGivenConnection {
     );
 
     /**
-     * Issues a SQL insert, update or delete statement, retfldIndexurning the number of rows affected
+     * Issues a SQL insert, update or delete statement, returning the number of rows affected
      */
     int update(Function<Connection, PreparedStatement> preparedStatementCreator);
 
