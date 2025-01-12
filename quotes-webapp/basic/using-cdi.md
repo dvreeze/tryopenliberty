@@ -335,7 +335,7 @@ Bean classes with pseudo-scope `Dependent` do not have this restriction, though.
 
 Finally, it has been said multiple times before, but:
 * Do use CDI's dependency injection (and contexts as well, of course)
-* Use Java interfaces as API contracts at layer boundaries, also for the managed bean types (using a `Typed` annotation)
+* Use Java interfaces as API contracts at layer boundaries, also for the managed bean's bean types (using a `Typed` annotation)
   * Also use Java interfaces as producer method return types
 * Use constructor-based injection creating fully initialized classes, enabling manual object construction in test code
   * Producer methods may be used as an alternative (cf. constructors versus factory methods)
