@@ -20,8 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteJdbcDao;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectJdbcDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionOperations;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionTemplate;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
@@ -47,14 +47,14 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.SQLExceptio
  *
  * @author Chris de Vreeze
  */
-@Typed({QuoteDao.class})
+@Typed({QuoteJdbcDao.class})
 @ApplicationScoped
-public class QuoteDaoImpl implements QuoteDao {
+public class QuoteJdbcDaoImpl implements QuoteJdbcDao {
 
-    private final SubjectDao subjectDao;
+    private final SubjectJdbcDao subjectDao;
 
     @Inject
-    public QuoteDaoImpl(SubjectDao subjectDao) {
+    public QuoteJdbcDaoImpl(SubjectJdbcDao subjectDao) {
         this.subjectDao = subjectDao;
     }
 

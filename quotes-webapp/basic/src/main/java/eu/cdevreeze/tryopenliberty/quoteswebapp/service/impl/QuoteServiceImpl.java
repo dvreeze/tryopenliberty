@@ -19,7 +19,7 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.service.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.cdi.annotation.QuoteDataSource;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteDao;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteJdbcDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcOperations;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcTemplate;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.transaction.TransactionConfig;
@@ -45,11 +45,11 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.transaction
 @ApplicationScoped
 public class QuoteServiceImpl implements QuoteService {
 
-    private final QuoteDao quoteDao;
+    private final QuoteJdbcDao quoteDao;
     private final DataSource dataSource;
 
     @Inject
-    public QuoteServiceImpl(QuoteDao quoteDao, @QuoteDataSource DataSource dataSource) {
+    public QuoteServiceImpl(QuoteJdbcDao quoteDao, @QuoteDataSource DataSource dataSource) {
         this.quoteDao = quoteDao;
         this.dataSource = dataSource;
     }

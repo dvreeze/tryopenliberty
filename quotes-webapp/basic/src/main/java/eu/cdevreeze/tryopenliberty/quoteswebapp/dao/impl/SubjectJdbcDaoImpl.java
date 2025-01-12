@@ -17,7 +17,7 @@
 package eu.cdevreeze.tryopenliberty.quoteswebapp.dao.impl;
 
 import com.google.common.collect.ImmutableSet;
-import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectDao;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.SubjectJdbcDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionOperations;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.JdbcConnectionTemplate;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -38,9 +38,9 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.SQLExceptio
  *
  * @author Chris de Vreeze
  */
-@Typed({SubjectDao.class})
+@Typed({SubjectJdbcDao.class})
 @ApplicationScoped
-public class SubjectDaoImpl implements SubjectDao {
+public class SubjectJdbcDaoImpl implements SubjectJdbcDao {
 
     @Override
     public Function<Connection, ImmutableSet<String>> findAllSubjects() {

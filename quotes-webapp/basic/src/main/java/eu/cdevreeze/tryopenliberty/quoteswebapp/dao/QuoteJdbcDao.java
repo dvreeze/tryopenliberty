@@ -16,14 +16,17 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.dao;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
 
 import java.sql.Connection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Subject DAO interface.
+ * Quotes DAO interface.
  * <p>
  * Unlike much example code for Open Liberty (or Jakarta EE) projects, the DAO layer is an abstract
  * Java interface. Also, the data passed and returned in the DAO methods is immutable, to the extent
@@ -33,11 +36,21 @@ import java.util.function.Function;
  *
  * @author Chris de Vreeze
  */
-public interface SubjectDao {
+public interface QuoteJdbcDao {
 
-    Function<Connection, ImmutableSet<String>> findAllSubjects();
+    Function<Connection, ImmutableList<Quote>> findAllQuotes();
 
-    Consumer<Connection> insertSubjectIfAbsent(String subject);
+    Function<Connection, Optional<Quote>> findQuoteById(long quoteId);
 
-    Consumer<Connection> deleteSubjectById(long subjectId);
+    Function<Connection, ImmutableList<Quote>> findQuotesByAuthor(String attributedTo);
+
+    Function<Connection, ImmutableList<Quote>> findQuotesBySubject(String subject);
+
+    Function<Connection, Quote> insertQuote(
+            String quoteText,
+            String attributedTo,
+            ImmutableSet<String> subjects
+    );
+
+    Consumer<Connection> deleteQuoteById(long quoteId);
 }
