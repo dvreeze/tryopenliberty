@@ -34,7 +34,9 @@ such as DAO (data access object) types, service types, etc.
 
 There are multiple reasons for using Java interface types at injection points:
 * Writing a Java interface forces us to think about the "contract" of the component, without being distracted by any implementation details
-  * Often, multiple implementations of the interface will be created, in particular for testing purposes
+  * Often, multiple implementations of the interface will "organically appear", in particular for testing purposes
+  * So the idea is not to start with implementation classes and to then discover the common contract as Java interface
+  * Instead, the idea is to first think about the contract as Java interface, and then let implementation follow
 * If needed, the interface allows for different implementations to be injected, such as a synchronous and asynchronous implementation of the dependency
 * This flexibility becomes really beneficial for testing purposes
   * For example, for testing purposes it may be desirable to have very lightweight service/DAO implementations that do not need any database, for example
@@ -208,6 +210,11 @@ Again, if the required qualifier annotation contains data fields, they are used 
 Of course, it is an error if no bean is assignable to an injection point. If, however, multiple beans
 are assignable, there are some rules that may help in resolving the "best match". This is not discussed
 here.
+
+Note that *dependency injection* in CDI is *type-safe*, unlike JNDI name "string matching". This is a
+huge advantage of CDI compared to JNDI resource injection based on JNDI names. CDI's dependency injection
+is based on "qualified types", so to speak, where the qualifiers themselves are instances of annotation
+types.
 
 It might be interesting to note that qualifier types occur in places where we might not directly
 expect them. For example, `org.eclipse.microprofile.health.Liveness` and `org.eclipse.microprofile.health.Readiness`
