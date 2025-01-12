@@ -19,7 +19,6 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc;
 import java.sql.Connection;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * JDBC "operations". Somewhat inspired by Spring.
@@ -30,15 +29,5 @@ public interface JdbcOperations {
 
     <R> R execute(Function<Connection, R> connectionFunction);
 
-    <R> R execute(
-            Function<Connection, R> connectionFunction,
-            UnaryOperator<Function<Connection, R>> connectionInterceptor
-    );
-
     void execute(Consumer<Connection> connectionConsumer);
-
-    void execute(
-            Consumer<Connection> connectionConsumer,
-            UnaryOperator<Consumer<Connection>> connectionInterceptor
-    );
 }

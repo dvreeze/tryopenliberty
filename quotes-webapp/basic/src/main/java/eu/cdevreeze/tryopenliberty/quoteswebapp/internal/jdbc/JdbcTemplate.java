@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * JDBC "template", making the use of JDBC a bit easier. Somewhat inspired by Spring, but also by the JDK
@@ -51,24 +50,11 @@ public class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public <R> R execute(
-            Function<Connection, R> connectionFunction,
-            UnaryOperator<Function<Connection, R>> connectionInterceptor
-    ) {
-        return execute(connectionInterceptor.apply(connectionFunction));
-    }
-
-    @Override
     public void execute(Consumer<Connection> connectionConsumer) {
         try (Connection con = dataSource.getConnection()) {
             connectionConsumer.accept(con);
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         }
-    }
-
-    @Override
-    public void execute(Consumer<Connection> connectionConsumer, UnaryOperator<Consumer<Connection>> connectionInterceptor) {
-        execute(connectionInterceptor.apply(connectionConsumer));
     }
 }
