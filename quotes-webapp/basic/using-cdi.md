@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This article is about *Jakarta Contexts and Dependency Injection*, which ia an official
+This article is about *Jakarta Contexts and Dependency Injection*, which is an official
 [standard](https://jakarta.ee/specifications/cdi/4.1/jakarta-cdi-spec-4.1) with multiple implementations.
 
 The *lifecycle contexts* part of *CDI* is mostly ignored in this article. The focus is mainly on
@@ -130,7 +130,7 @@ Qualifiers can also *contain data*. For example, a `Color` qualifier type can co
 as annotation data field. This annotation data is also important for resolving dependencies at injection
 points, should one of the required qualifiers contain annotation data.
 
-We can also create our own *qualifiers* in the application code base. If that makes sense, by all means
+We can also create our own *qualifiers* in the application code base. If it makes sense, by all means
 introduce qualifier types as part of the application code base.
 
 ### Managed beans, and their types and qualifiers
@@ -144,7 +144,7 @@ Interfaces can not act as managed bean classes. The most important restrictions 
   * Or a *constructor* annotated with the `Inject` annotation
 
 A managed bean class has a set of *bean types*. Roughly the set of bean types of a managed bean class
-is the class and all its super-types, including interface types if any, and type `java.lang.Object`.
+is the class and all its super-types, including interface types, if any, and type `java.lang.Object`.
 Only *legal bean types* are included, which roughly means that *type variables* and *parameterized
 types containing wildcards* are excluded from the set of bean types of a managed bean class.
 
@@ -169,15 +169,15 @@ Recalling the best practices mentioned earlier, it is important to use this `Typ
 to *prevent class-based dependency injection* for implementation classes that implement appropriate
 interfaces. If we don't, then we would not enforce the best practice of interface-based dependency injection.
 
-Besides *bean types*, a *managed bean class* contains 0 or more (explicit) *qualifier types*. These
-qualifier types are the *qualifier* annotations of the managed bean class.
+Besides *bean types*, a *managed bean class* contains 0 or more (explicit) *qualifiers*. These
+qualifiers are the *qualifier* annotations of the managed bean class.
 
 If an injection point has no qualifier, the implicit qualifier is `Default`. All injection points have
 implicit qualifier `Any`, so for practical purposes we can ignore the latter qualifier.
 
 So, among the important properties of a managed bean class are:
 * the *bean types* of the managed bean class
-* the *qualifier types* of the managed bean class
+* the *qualifiers* of the managed bean class
 
 These two properties are important for dependency injection resolution, which is the topic of the next
 section.
@@ -212,7 +212,7 @@ here.
 It might be interesting to note that qualifier types occur in places where we might not directly
 expect them. For example, `org.eclipse.microprofile.health.Liveness` and `org.eclipse.microprofile.health.Readiness`
 are qualifier types because they are meta-annotated as `Qualifier` and have retention `RUNTIME`.
-We have qualifiers even where we might not expect them, e.g. in standard health checks.
+So we have qualifiers even where we might not expect them, e.g. in standard health checks.
 But then it was said earlier that Jakarta EE uses CDI a lot itself.
 
 ### Producer methods and fields
@@ -248,8 +248,7 @@ For example:
 public class DataSourceProducer {
 
     @Produces
-    @QuoteDataSource
-    @Typed({DataSource.class})
+    @PaymentDataSource
     @Resource(name = "jdbc/paymentDataSource")
     private DataSource dataSource;
 }
@@ -260,8 +259,8 @@ typesafe injection resolution.
 
 ### CDI introspection
 
-It can be helpful to use "CDI introspection" in an application, in order to find the managed
-beans. Consider filtering the results on the package names, in order to exclude managed beans
+It can be helpful for our understanding to use "CDI introspection" in an application, in order to find the
+managed beans. Consider filtering the results on the package names, in order to exclude managed beans
 from libraries. The following code can be used as a starting point:
 
 ```java
@@ -335,7 +334,9 @@ it cannot have only a private constructor, it cannot have final public instance 
 Bean classes with pseudo-scope `Dependent` do not have this restriction, though.
 
 Finally, it has been said multiple times before, but:
+* Do use CDI's dependency injection (and contexts as well, of course)
 * Use Java interfaces as API contracts at layer boundaries, also for the managed bean types (using a `Typed` annotation)
+  * Also use Java interfaces as producer method return types
 * Use constructor-based injection creating fully initialized classes, enabling manual object construction in test code
   * Producer methods may be used as an alternative (cf. constructors versus factory methods)
   * Producer methods may also be accompanied by disposer methods for proper cleanup (which have not been discussed here)
