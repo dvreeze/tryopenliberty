@@ -1,0 +1,1 @@
+curl -X POST -d "@quote.json" -H "Content-Type: application/json" http://localhost:9080/quotes-webapp/quotes-app/quotes/
