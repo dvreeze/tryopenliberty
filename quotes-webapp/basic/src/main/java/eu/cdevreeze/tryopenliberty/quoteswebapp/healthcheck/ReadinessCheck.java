@@ -16,7 +16,12 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.healthcheck;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.model.Quote;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.Readiness;
@@ -30,8 +35,18 @@ import org.eclipse.microprofile.health.Readiness;
 @ApplicationScoped
 public class ReadinessCheck implements HealthCheck {
 
+    private final QuoteService quoteService;
+
+    @Inject
+    public ReadinessCheck(QuoteService quoteService) {
+        this.quoteService = quoteService;
+    }
+
     @Override
     public HealthCheckResponse call() {
+        ImmutableList<Quote> quotes = quoteService.findAllQuotes();
+        Preconditions.checkArgument(!quotes.isEmpty());
+
         var msg = ReadinessCheck.class.getSimpleName() + " Readiness Check";
         return HealthCheckResponse.up(msg);
     }
