@@ -14,7 +14,7 @@ the *dependency injection* part, covering only the basics. CDI features such as 
 Let's first briefly discuss the notion of *dependency injection* in general, without referring to CDI.
 
 In Java "enterprise" applications, the use of *dependency injection* is a widely used best practice.
-Instead of the inflexible approach of having instances of classes looking up their dependencies themselves,
+Instead of the inflexible approach of having instances of classes internally creating their dependencies themselves,
 these dependencies of the instance of a class are *injected* into the class instance at "construction
 time". Often, this injection is *constructor-based*.
 
@@ -78,7 +78,7 @@ applications that would be the Spring container (`ApplicationContext`). In Jakar
 would be the *CDI container*.
 
 To summarize the *best practices* mentioned so far, keep the following in mind:
-* *Dependency injection* is much more flexible (and "testable") than dependency lookup
+* *Dependency injection* is much more flexible (and "testable") than internal hard-coded dependency creation
 * Prefer *interface-based* dependency injection to class-based dependency injection
 * Use *constructor-based* dependency injection, where even manual construction would work for (unit) testing purposes
 
