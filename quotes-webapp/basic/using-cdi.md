@@ -34,10 +34,10 @@ such as DAO (data access object) types, service types, etc.
 
 There are multiple reasons for using Java interface types at injection points:
 * Writing a Java interface forces us to think about the "contract" of the component, without being distracted by any implementation details
-  * Often, multiple implementations of the interface will "organically appear", in particular for testing purposes
+  * Often, multiple implementations of the interface will "organically start to appear", in particular for testing purposes
   * So the idea is not to start with implementation classes and to then discover the common contract as Java interface
   * Instead, the idea is to first think about the contract as Java interface, and then let implementation follow
-* If needed, the interface allows for different implementations to be injected, such as a synchronous and asynchronous implementation of the dependency
+* If needed, the interface allows for different implementations to be injected, such as a synchronous and asynchronous implementation of a certain dependency
 * This flexibility becomes really beneficial for testing purposes
   * For example, for testing purposes it may be desirable to have very lightweight service/DAO implementations that do not need any database, for example
   * So, when unit testing a Jakarta REST resource, why not use an injected service implementation requiring no database?
@@ -45,7 +45,7 @@ There are multiple reasons for using Java interface types at injection points:
 * The dependency injection is still *compile-time typesafe*, just as class-based dependency injection
 
 It is also desirable to use *constructor-based injection* and stay away from field-based injection.
-In general, it is a best practice to have constructors create fully initialized objects, that making
+In general, it is a best practice to have constructors create fully initialized objects, thus making
 *reasoning about the possible state(s) of the object* easier. Besides that, there is a very practical
 reason to use constructor-based injection (and at least stay away from field-based injection), and that
 is the possibility to *manually create* an instance of the dependency in testing scenarios.
@@ -124,7 +124,7 @@ public @interface Synchronous {
 
 A *qualifier type* is a *Java annotation type* with the following extra constraints:
 * It has the `Qualifier` meta-annotation
-* It has *retention* `RUNTIME`, so Java reflection-based tooling has access to the annotation
+* It has *retention* `RUNTIME`, so Java reflection-based tooling such as CDI has access to the annotation at runtime
 * Typically, but not necessarily, the *target* includes `METHOD`, `FIELD`, `PARAMETER` and `TYPE`
 * Typically, but not necessarily, it contains meta-annotation `Documented` as well
 
@@ -342,7 +342,7 @@ Bean classes with pseudo-scope `Dependent` do not have this restriction, though.
 
 Finally, it has been said multiple times before, but:
 * Do use CDI's dependency injection (and contexts as well, of course)
-* Use Java interfaces as API contracts at layer boundaries, also for the managed bean's bean types (using a `Typed` annotation)
+* Use Java interfaces as API contracts at layer boundaries, also for the managed bean's bean types (specified by a `Typed` annotation)
   * Also use Java interfaces as producer method return types
 * Use constructor-based injection creating fully initialized classes, enabling manual object construction in test code
   * Producer methods may be used as an alternative (cf. constructors versus factory methods)
