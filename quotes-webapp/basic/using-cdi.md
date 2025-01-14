@@ -220,7 +220,7 @@ It might be interesting to note that qualifier types occur in places where we mi
 expect them. For example, `org.eclipse.microprofile.health.Liveness` and `org.eclipse.microprofile.health.Readiness`
 are qualifier types because they are meta-annotated as `Qualifier` and have retention `RUNTIME`.
 So we have qualifiers even where we might not expect them, e.g. in standard health checks.
-But then it was said earlier that Jakarta EE uses CDI a lot itself.
+Indeed, Jakarta EE and MicroProfile use CDI a lot themselves.
 
 ### Producer methods and fields
 
@@ -299,10 +299,10 @@ Adding annotations to a class may be intrusive, depending on the role and expect
 the annotation. Also, some sets of annotations should not be used together. A clear example
 is JAXB annotations and JSONB annotations. Yet also EJB-defining annotations should not be used
 on CDI managed beans if they do not offer anything of value for that bean. For example, the
-`Stateless` annotation for stateless session beans. If there is no reason for the CDI managed bean
-to be an EJB (in this case a stateless session bean), what is the point of adding that annotation?
-The principle I have in mind here is the *principle of least power*. All enabled power (in this case
-in the form of additional annotations) comes with *additional mental load* (and potentially with
+`Stateless` annotation for stateless session beans is not always needed. If there is no reason for the
+CDI managed bean to be an EJB (in this case a stateless session bean), what is the point of adding that
+annotation? The principle I have in mind here is the *principle of least power*. All enabled power (in this
+case in the form of additional annotations) comes with *additional mental load* (and potentially with
 additional performance degradation).
 
 Starting with CDI 4.0, the default *bean discovery mode* is "annotated". This is a sensible default
@@ -337,8 +337,8 @@ Sometimes *byte code manipulation* is needed by CDI to "decorate" classes with a
 For example, an application-scoped managed bean with request-scoped dependencies must create fresh instances
 of those dependencies for each request. For that, CDI needs to extend and enhance the bean class through
 byte code manipulation. This means that the managed bean class must be extensible. So it cannot be final,
-it cannot have only a private constructor, it cannot have final public instance methods, etc.
-Bean classes with pseudo-scope `Dependent` do not have this restriction, though.
+it cannot have final public instance methods, etc. The bean class must also have a non-private no-parameter
+constructor. Bean classes with pseudo-scope `Dependent` do not have these restrictions, though.
 
 Finally, it has been said multiple times before, but:
 * Do use CDI's dependency injection (and contexts as well, of course)
