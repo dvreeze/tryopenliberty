@@ -91,9 +91,9 @@ of which Jakarta EE uses it quite extensively.
 
 So it is important to understand CDI. I feel it is often poorly understood (and I am also learning
 myself about CDI). What I often encounter is a mix of annotations on a class, including the CDI `Inject`
-annotation, and also the field-based `Resource` annotation for JNDI resources, where a clear
-disciplined approach to "wiring" seems to be lacking. We can do better than that, as we will see.
-Recall the best practices mentioned in the preceding section. That's where CDI can really help us.
+annotation, and also the `Resource` annotation for JNDI resources, which cannot be set on constructor
+parameters. We can do better than that, as we will see. Recall the best practices mentioned in the
+preceding section, in particular constructor-based injection. That's where CDI can really help us.
 
 So let's discuss the basics of CDI dependency injection, and how it supports the above-mentioned
 best practices.
@@ -211,8 +211,8 @@ Of course, it is an error if no bean is assignable to an injection point. If, ho
 are assignable, there are some rules that may help in resolving the "best match". This is not discussed
 here.
 
-Note that *dependency injection* in CDI is *type-safe*, unlike JNDI name "string matching". This is a
-huge advantage of CDI compared to JNDI resource injection based on JNDI names. CDI's dependency injection
+Note that *dependency injection* in CDI is *type-safe*, requiring no JNDI name "string matching". This is a
+substantial advantage of CDI compared to JNDI resource injection based on JNDI names. CDI's dependency injection
 is based on "qualified types", so to speak, where the qualifiers themselves are instances of annotation
 types.
 
@@ -262,7 +262,7 @@ public class DataSourceProducer {
 ```
 
 The JNDI resource for the `DataSource` is turned into a producer field, which can then be used for
-typesafe injection resolution.
+constructor-based typesafe injection.
 
 ### CDI introspection
 
