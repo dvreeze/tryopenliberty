@@ -18,7 +18,6 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect.cdi;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.Typed;
 
 /**
  * Rather involved way of getting the application base package.
@@ -29,7 +28,6 @@ import jakarta.enterprise.inject.Typed;
 public class ApplicationBasePackageHolder {
 
     @Produces
-    @Typed(String.class)
     @ApplicationBasePackage
     public String getApplicationBasePackage() {
         return "eu.cdevreeze.tryopenliberty";

@@ -20,7 +20,6 @@ import eu.cdevreeze.tryopenliberty.quoteswebapp.cdi.annotation.QuoteDataSource;
 import jakarta.annotation.Resource;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
-import jakarta.enterprise.inject.Typed;
 
 import javax.sql.DataSource;
 
@@ -37,7 +36,6 @@ public class DataSourceProducer {
 
     @Produces
     @QuoteDataSource
-    @Typed({DataSource.class})
     @Resource(name = "jdbc/quoteDataSource")
     private DataSource dataSource;
 }
