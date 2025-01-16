@@ -18,7 +18,7 @@ package eu.cdevreeze.tryopenliberty.quoteswebapp.infra;
 
 import eu.cdevreeze.tryopenliberty.quoteswebapp.cdi.annotation.QuoteDataSource;
 import jakarta.annotation.Resource;
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
 import javax.sql.DataSource;
@@ -31,7 +31,7 @@ import javax.sql.DataSource;
  *
  * @author Chris de Vreeze
  */
-@Dependent
+@ApplicationScoped
 public class DataSourceProducer {
 
     @Produces
