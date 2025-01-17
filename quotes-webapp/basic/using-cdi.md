@@ -79,8 +79,8 @@ would be the *CDI container*.
 
 To summarize the *best practices* mentioned so far, keep the following in mind:
 * *Dependency injection* is much more flexible (and "testable") than internal hard-coded dependency creation
-* Prefer *interface-based* dependency injection to class-based dependency injection
-* Use *constructor-based* dependency injection, where even manual construction would work for (unit) testing purposes
+* *Interface-based* dependency injection is much more flexible (and "testable") than class-based dependency injection
+* *Constructor-based* dependency injection (where the constructor can also be invoked manually) is much more flexible (and "testable") than field-based dependency injection
 
 The next section is about the *dependency injection* part of the *CDI container*.
 
