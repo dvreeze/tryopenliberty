@@ -82,7 +82,7 @@ public class HealthChecks {
     public HealthCheck threadHealthCheck() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
-        boolean status = threadMXBean.findDeadlockedThreads() == null || threadMXBean.findDeadlockedThreads().length > 0;
+        boolean status = threadMXBean.findDeadlockedThreads() == null || threadMXBean.findDeadlockedThreads().length == 0;
 
         ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
 
