@@ -128,12 +128,12 @@ A *qualifier type* is a *Java annotation type* with the following extra constrai
 * Typically, but not necessarily, the *target* includes `METHOD`, `FIELD`, `PARAMETER` and `TYPE`
 * Typically, but not necessarily, it contains meta-annotation `Documented` as well
 
-Qualifier annotation types can also *contain members*. For example, a `Color` qualifier type can contain the actual
+Qualifier annotations can also *contain members*. For example, a `Color` qualifier can contain the actual
 color as annotation member. These annotation members are also important for resolving dependencies at injection
 points, should at least one of the required qualifiers contain annotation members.
 
 Qualifier annotation members may be meta-annotated with the `Nonbinding` meta-annotation. Qualifier
-annotation members that are meta-annotated as being `Nonbinding` are ignored when two annotations
+annotation members that are meta-annotated as being `Nonbinding` are *ignored* when two annotations
 of the qualifier type are compared for equality.
 
 We can also create our own *qualifiers* in the application code base. If it makes sense, by all means
@@ -270,7 +270,7 @@ public class DataSourceProducer {
 The JNDI resource for the `DataSource` is turned into a producer field, which can then be used for
 constructor-based typesafe injection.
 
-This can become unpractical if there is a lot of configuration data in the form of JNDI "resources".
+This can become impractical if there is a lot of configuration data in the form of JNDI "resources".
 Yet for configuration data, consider the use of
 [MicroProfile Config](https://download.eclipse.org/microprofile/microprofile-config-3.1/microprofile-config-spec-3.1.html),
 which is fully aware of CDI and plays well with it.
