@@ -16,10 +16,14 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteData;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.model.QuoteList;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
+import jakarta.enterprise.inject.Default;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -44,6 +48,7 @@ public class QuotesResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public QuoteList.JsonbProxy findAllQuotes() {
+        checkQuoteServiceDependency();
         QuoteList quoteList = new QuoteList(quoteService.findAllQuotes());
         return quoteList.toJsonbProxy();
     }
@@ -52,6 +57,7 @@ public class QuotesResource {
     @Path("/quoteId/{quoteId}")
     @Produces(MediaType.APPLICATION_JSON)
     public QuoteList.JsonbProxy findQuoteById(@PathParam("quoteId") long quoteId) {
+        checkQuoteServiceDependency();
         QuoteList quoteList =
                 new QuoteList(
                         quoteService.findQuoteById(quoteId).stream().collect(ImmutableList.toImmutableList())
@@ -63,6 +69,7 @@ public class QuotesResource {
     @Path("/attributedTo/{attributedTo}")
     @Produces(MediaType.APPLICATION_JSON)
     public QuoteList.JsonbProxy findQuotesByAuthor(@PathParam("attributedTo") String author) {
+        checkQuoteServiceDependency();
         QuoteList quoteList = new QuoteList(quoteService.findQuotesByAuthor(author));
         return quoteList.toJsonbProxy();
     }
@@ -71,6 +78,7 @@ public class QuotesResource {
     @Path("/subject/{subject}")
     @Produces(MediaType.APPLICATION_JSON)
     public QuoteList.JsonbProxy findQuotesBySubject(@PathParam("subject") String subject) {
+        checkQuoteServiceDependency();
         QuoteList quoteList = new QuoteList(quoteService.findQuotesBySubject(subject));
         return quoteList.toJsonbProxy();
     }
@@ -78,6 +86,7 @@ public class QuotesResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void insertQuote(QuoteData.JsonbProxy quote) {
+        checkQuoteServiceDependency();
         QuoteData qt = QuoteData.fromJsonbProxy(quote);
         quoteService.insertQuote(qt.quoteText(), qt.attributedTo(), qt.subjects());
     }
@@ -85,6 +94,24 @@ public class QuotesResource {
     @DELETE
     @Path("/{quoteId}")
     public void deleteQuote(@PathParam("quoteId") long quoteId) {
+        checkQuoteServiceDependency();
         quoteService.deleteQuoteById(quoteId);
+    }
+
+    private void checkQuoteServiceDependency() {
+        // Checking my understanding of (parts of) CDI (without passivation)
+        Instance<QuoteService> serviceInstance =
+                CDI.current().select(QuoteService.class, Default.Literal.INSTANCE);
+        Instance.Handle<QuoteService> serviceInstanceHandle = serviceInstance.getHandle();
+
+        QuoteService serviceObject = serviceInstanceHandle.get();
+
+        Preconditions.checkArgument(
+                serviceObject.equals(
+                        CDI.current().select(QuoteService.class, Default.Literal.INSTANCE).get()
+                )
+        );
+        // The check I hope to be successful
+        Preconditions.checkArgument(serviceObject.equals(this.quoteService));
     }
 }
