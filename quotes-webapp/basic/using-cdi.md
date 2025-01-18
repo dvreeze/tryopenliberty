@@ -128,9 +128,13 @@ A *qualifier type* is a *Java annotation type* with the following extra constrai
 * Typically, but not necessarily, the *target* includes `METHOD`, `FIELD`, `PARAMETER` and `TYPE`
 * Typically, but not necessarily, it contains meta-annotation `Documented` as well
 
-Qualifiers can also *contain data*. For example, a `Color` qualifier type can contain the actual color
-as annotation data field. This annotation data is also important for resolving dependencies at injection
-points, should one of the required qualifiers contain annotation data.
+Qualifier annotation types can also *contain members*. For example, a `Color` qualifier type can contain the actual
+color as annotation member. These annotation members are also important for resolving dependencies at injection
+points, should at least one of the required qualifiers contain annotation members.
+
+Qualifier annotation members may be meta-annotated with the `Nonbinding` meta-annotation. Qualifier
+annotation members that are meta-annotated as being `Nonbinding` are ignored when two annotations
+of the qualifier type are compared for equality.
 
 We can also create our own *qualifiers* in the application code base. If it makes sense, by all means
 introduce qualifier types as part of the application code base.
@@ -205,7 +209,9 @@ So, a *bean is assignable to an injection point* if:
 * The bean has a bean type that matches the *required type* at the injection point, and
 * The bean has *all required qualifiers* (again mind qualifier `Default` if no qualifiers were explicitly given)
 
-Again, if the required qualifier annotation contains data fields, they are used in this matching process.
+Again, if the required qualifier annotation contains annotation members, they are used in this matching process.
+Yet `Nonbinding` annotated qualifier annotation members are *ignored* when comparing two instances of
+the qualifier annotation type.
 
 Of course, it is an error if no bean is assignable to an injection point. If, however, multiple beans
 are assignable, there are some rules that may help in resolving the "best match". This is not discussed
@@ -263,6 +269,11 @@ public class DataSourceProducer {
 
 The JNDI resource for the `DataSource` is turned into a producer field, which can then be used for
 constructor-based typesafe injection.
+
+This can become unpractical if there is a lot of configuration data in the form of JNDI "resources".
+Yet for configuration data, consider the use of
+[MicroProfile Config](https://download.eclipse.org/microprofile/microprofile-config-3.1/microprofile-config-spec-3.1.html),
+which is fully aware of CDI and plays well with it.
 
 ### CDI introspection
 
@@ -341,10 +352,11 @@ it cannot have final public instance methods, etc. The bean class must also have
 constructor. Bean classes with pseudo-scope `Dependent` do not have these restrictions, though.
 
 Finally, it has been said multiple times before, but:
-* Do use CDI's dependency injection (and contexts as well, of course)
-* Use Java interfaces as API contracts at layer boundaries, also for the managed bean's bean types (specified by a `Typed` annotation)
+* Do use *CDI's dependency injection* (and contexts as well, of course)
+* Use *Java interfaces* as API contracts at layer boundaries, also for the managed bean's bean types (specified by a `Typed` annotation)
   * Also use Java interfaces as producer method return types
-* Use constructor-based injection creating fully initialized classes, enabling manual object construction in test code
+* Use *constructor-based injection* creating fully initialized classes, enabling manual object construction in test code
   * Producer methods may be used as an alternative (cf. constructors versus factory methods)
   * Producer methods may also be accompanied by disposer methods for proper cleanup (which have not been discussed here)
 * Turn JNDI resources into producer fields
+* Consider the use of MicroProfile Config for configuration data
