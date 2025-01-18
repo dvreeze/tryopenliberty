@@ -33,12 +33,12 @@ This does not always apply, of course, but it should be a common practice for "a
 such as DAO (data access object) types, service types, etc.
 
 There are multiple reasons for using Java interface types at injection points:
-* Writing a Java interface forces us to think about the "contract" of the component, without being distracted by any implementation details
+* Writing a Java interface forces us to think about the *API contract* of the component, without being distracted by any implementation details
   * Often, multiple implementations of the interface will "organically start to appear", in particular for testing purposes
   * So the idea is not to start with implementation classes and to then discover the common contract as Java interface
   * Instead, the idea is to first think about the contract as Java interface, and then let implementation follow
 * If needed, the interface allows for different implementations to be injected, such as a synchronous and asynchronous implementation of a certain dependency
-* This flexibility becomes really beneficial for testing purposes
+* This *flexibility* becomes really beneficial for testing purposes
   * For example, for testing purposes it may be desirable to have very lightweight service/DAO implementations that do not need any database, for example
   * So, when unit testing a Jakarta REST resource, why not use an injected service implementation requiring no database?
   * This may also reduce the need for traditional mocking (using Mockito etc.), which is often sensitive in that it may depend on internal implementation details
@@ -195,7 +195,7 @@ Matching managed beans to injection points is called *typesafe resolution*. See
 
 This is resolution at the type level, so it has no relationship to (contextual) instances of the bean,
 or to their scopes. That is entirely unrelated. Typesafe resolution typically takes place at
-application initialization time.
+application *initialization* time.
 
 It is very important to understand that *typesafe resolution* is not based on just the *required types*
 at the injection point, but on the *combination of required type and required qualifiers*.
