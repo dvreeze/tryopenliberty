@@ -57,8 +57,9 @@ public class Client {
 
 Just imagine that in the example without dependency injection the created dependency is a
 `javax.sql.DataSource`. Surely the properties of the `DataSource` could be looked up from some
-property file (which one would depend on some "profile"), but this gets problematic very quickly,
-and certainly does not help in testing the `Client` class.
+property file (which one would depend on some "profile", such as "dev", "prod" etc.), but this gets
+quite problematic very quickly, and certainly does not help in testing the `Client` class.
+It would also violate the *Single Responsibility Principle*.
 
 In "enterprise" Java, *dependency injection* has been popularized by the *Spring framework*.
 
