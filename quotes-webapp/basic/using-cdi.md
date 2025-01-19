@@ -61,6 +61,10 @@ property file (which one would depend on some "profile", such as "dev", "prod" e
 quite problematic very quickly, and certainly does not help in testing the `Client` class.
 It would also violate the *Single Responsibility Principle*.
 
+Such code without dependency injection tends to contain lots of (inflexible) `static` initialization methods,
+which is a code smell. Note that `static` methods cannot be abstracted over. Interfaces can only
+abstract over *instance methods*.
+
 In "enterprise" Java, *dependency injection* has been popularized by the *Spring framework*.
 
 It is preferable to use *Java interfaces* as the *required type* at *injection points*.
@@ -162,7 +166,7 @@ public @interface Synchronous {
 
 A *qualifier type* is a *Java annotation type* with the following extra constraints:
 * It has the `Qualifier` meta-annotation
-* It has *retention* `RUNTIME`, so Java reflection-based tooling such as CDI has access to the annotation at runtime
+* It has *retention* `RUNTIME`, so Java reflection-based/byte-code-manipulation-based tooling such as CDI has access to the annotation at runtime
 * Typically, but not necessarily, the *target* includes `METHOD`, `FIELD`, `PARAMETER` and `TYPE`
 * Typically, but not necessarily, it contains meta-annotation `Documented` as well
 
@@ -238,12 +242,12 @@ application *initialization* time.
 It is very important to understand that *typesafe resolution* is not based on just the *required types*
 at the injection point, but on the *combination of required type and required qualifiers*.
 
-So if the bean class contains a custom qualifier (and therefore does not contain implicit qualifier
+For example, if the bean class only contains a custom qualifier (and therefore does not contain implicit qualifier
 `Default`) and at the injection point no qualifier is mentioned (so the implicit qualifier is `Default`
 there) there is *no match*. So, injection resolution is based on *type plus qualifiers*, not on just
 the type.
 
-So, a *bean is assignable to an injection point* if:
+More precisely, a *bean is assignable to an injection point* if:
 * The bean has a bean type that matches the *required type* at the injection point, and
 * The bean has *all required qualifiers* (again mind qualifier `Default` if no qualifiers were explicitly given)
 
@@ -263,8 +267,9 @@ types.
 It might be interesting to note that qualifier types occur in places where we might not directly
 expect them. For example, `org.eclipse.microprofile.health.Liveness` and `org.eclipse.microprofile.health.Readiness`
 are qualifier types because they are meta-annotated as `Qualifier` and have retention `RUNTIME`.
-So we have qualifiers even where we might not expect them, e.g. in standard health checks.
-Indeed, Jakarta EE and MicroProfile use CDI a lot themselves.
+So we have qualifiers even where we might not immediately expect them, e.g. in standard health checks.
+It does make sense, though, that `Liveness` and `Readiness` are qualifier annotation types.
+Indeed, Jakarta EE and MicroProfile use CDI a lot themselves. CDI is really a "foundational standard".
 
 ### Producer methods and fields
 
@@ -273,9 +278,9 @@ So-called *producer methods* may act as a source of objects to be injected. See
 
 Producer methods are methods where the return type is annotated with annotation `Produces`.
 
-This return type may have multiple qualifier annotations that we also encounter on managed beans. Of course,
-these annotations play a role in typesafe injection resolution, in the same way that managed bean qualifier
-annotations do.
+This return type may have multiple qualifier annotations, just like managed beans may have multiple qualifiers.
+Of course, these annotations play a role in typesafe injection resolution, in the same way that managed bean
+qualifier annotations do.
 
 As for the *bean types of a producer method*, they depend on the *method return type* itself.
 These types include the return type and its supertypes, but excludes any type that is not a
@@ -299,7 +304,7 @@ For example:
 public class DataSourceProducer {
 
     @Produces
-    @PaymentDataSource
+    @PaymentDataSource // A qualifier annotation
     @Resource(name = "jdbc/paymentDataSource")
     private DataSource dataSource;
 }
@@ -312,6 +317,11 @@ This can become impractical if there is a lot of configuration data in the form 
 Yet for configuration data, consider the use of
 [MicroProfile Config](https://download.eclipse.org/microprofile/microprofile-config-3.1/microprofile-config-spec-3.1.html),
 which is fully aware of CDI and plays well with it.
+
+*MicroProfile Config* is not treated in this article, although it integrates well with CDI and can be
+considered a "foundational standard" itself. To make sense of MicroProfile Config, it is very important
+to realize the following: the `ConfigProperty` and `ConfigProperties` *qualifier* annotations have
+members (`name` and `defaultValue`, and `prefix`, respectively) that are all `Nonbinding`.
 
 ### CDI introspection
 
@@ -328,17 +338,24 @@ from libraries. The following code can be used as a starting point:
 ```
 
 The returned beans have properties such as:
-* Name (typically not needed for injection resolution)
-* Bean class (fully qualified class name)
-* The bean types
-* The qualifiers
-* The scope (not treated here)
-* So-called stereotypes (not discussed here)
-* Injection points
+* *Name* (typically not needed for injection resolution)
+* *Bean class* (fully qualified class name)
+* The *bean types*
+* The *qualifiers*
+* The *scope* (not treated here)
+* So-called *stereotypes* (not discussed here)
+* *Injection points*
 
 Be careful when interpreting the results. If a bean class has a producer method, it is likely that
 there are 2 entries for the same bean class, but with different bean types (one entry for the bean
 class, and one entry for the producer method return type).
+
+*Contextual bean references* can be looked up programmatically. It does not hurt to try this out, even
+when dependency injection suffices. For example:
+
+```java
+PaymentService paymentService = CDI.current().select(PaymentService.class, Default.Literal.INSTANCE).get();
+```
 
 ## Additional remarks
 
@@ -346,7 +363,7 @@ Finally, I would like to conclude with some remarks.
 
 Adding annotations to a class may be intrusive, depending on the role and expected processing of
 the annotation. Also, some sets of annotations should not be used together. A clear example
-is JAXB annotations and JSONB annotations. Yet also EJB-defining annotations should not be used
+is JAXB annotations and JSON-B annotations. Yet also EJB-defining annotations should not be used
 on CDI managed beans if they do not offer anything of value for that bean. For example, the
 `Stateless` annotation for stateless session beans is not always needed. If there is no reason for the
 CDI managed bean to be an EJB (in this case a stateless session bean), what is the point of adding that
