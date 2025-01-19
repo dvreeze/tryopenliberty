@@ -16,8 +16,11 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect;
 
+import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteJdbcDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect.cdi.ApplicationBasePackage;
+import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
 import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
@@ -31,6 +34,12 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,6 +97,22 @@ public class IntrospectionResource {
                 .build();
     }
 
+    @GET
+    @Path("quote-service-proxy-class")
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonObject getQuoteServiceProxyClass() {
+        QuoteService quoteService = CDI.current().select(QuoteService.class, Default.Literal.INSTANCE).get();
+        return convertToJson(quoteService);
+    }
+
+    @GET
+    @Path("quote-dao-proxy-class")
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonObject getQuoteDaoProxyClass() {
+        QuoteJdbcDao quoteDao = CDI.current().select(QuoteJdbcDao.class, Default.Literal.INSTANCE).get();
+        return convertToJson(quoteDao);
+    }
+
     private JsonObject convertToJson(Bean<?> bean) {
         return jsonProvider.createObjectBuilder()
                 .add(
@@ -128,6 +153,57 @@ public class IntrospectionResource {
                                 bean.getInjectionPoints().stream()
                                         .map(ip -> jsonProvider.createValue(ip.toString()))
                                         .toList()
+                        )
+                )
+                .build();
+    }
+
+    private JsonObject convertToJson(QuoteService quoteService) {
+        return jsonProvider.createObjectBuilder()
+                .add("object", quoteService.toString())
+                .add("class", convertToJson(quoteService.getClass()))
+                .build();
+    }
+
+    private JsonObject convertToJson(QuoteJdbcDao quoteDao) {
+        return jsonProvider.createObjectBuilder()
+                .add("object", quoteDao.toString())
+                .add("class", convertToJson(quoteDao.getClass()))
+                .build();
+    }
+
+    private JsonObject convertToJson(Class<?> clazz) {
+        return jsonProvider.createObjectBuilder()
+                .add("class", clazz.getName())
+                .add("superClass", Optional.ofNullable(clazz.getGenericSuperclass()).map(Type::getTypeName).orElse(""))
+                .add(
+                        "interfaces",
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getGenericInterfaces()).map(Type::getTypeName).toList()
+                        )
+                )
+                .add(
+                        "declaredFields",
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getDeclaredFields()).map(Field::toString).toList()
+                        )
+                )
+                .add(
+                        "declaredConstructors",
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getDeclaredConstructors()).map(Constructor::toString).toList()
+                        )
+                )
+                .add(
+                        "declaredMethods",
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getDeclaredMethods()).map(Method::toString).toList()
+                        )
+                )
+                .add(
+                        "declaredAnnotations",
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getDeclaredAnnotations()).map(Annotation::toString).toList()
                         )
                 )
                 .build();

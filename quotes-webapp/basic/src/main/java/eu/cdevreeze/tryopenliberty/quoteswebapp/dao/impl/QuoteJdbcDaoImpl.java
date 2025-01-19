@@ -49,7 +49,9 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.SQLExceptio
  */
 @Typed({QuoteJdbcDao.class})
 @ApplicationScoped
-public class QuoteJdbcDaoImpl implements QuoteJdbcDao {
+public final class QuoteJdbcDaoImpl implements QuoteJdbcDao {
+
+    // Final works; the proxy uses the interface and composition rather than concrete inheritance from this class
 
     private final SubjectJdbcDao subjectDao;
 

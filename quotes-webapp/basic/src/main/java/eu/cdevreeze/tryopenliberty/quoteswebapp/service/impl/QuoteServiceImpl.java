@@ -43,7 +43,9 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.transaction
  */
 @Typed({QuoteService.class})
 @ApplicationScoped
-public class QuoteServiceImpl implements QuoteService {
+public final class QuoteServiceImpl implements QuoteService {
+
+    // Final works; the proxy uses the interface and composition rather than concrete inheritance from this class
 
     private final QuoteJdbcDao quoteDao;
     private final DataSource dataSource;

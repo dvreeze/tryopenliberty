@@ -40,7 +40,9 @@ import static eu.cdevreeze.tryopenliberty.quoteswebapp.internal.jdbc.SQLExceptio
  */
 @Typed({SubjectJdbcDao.class})
 @ApplicationScoped
-public class SubjectJdbcDaoImpl implements SubjectJdbcDao {
+public final class SubjectJdbcDaoImpl implements SubjectJdbcDao {
+
+    // Final works; the proxy uses the interface and composition rather than concrete inheritance from this class
 
     @Override
     public Function<Connection, ImmutableSet<String>> findAllSubjects() {
