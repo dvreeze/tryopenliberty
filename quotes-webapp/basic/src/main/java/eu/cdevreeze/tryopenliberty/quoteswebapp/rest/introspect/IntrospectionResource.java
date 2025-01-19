@@ -61,7 +61,7 @@ public class IntrospectionResource {
         // This returns all CDI beans, of any type and any set of qualifiers
         // Recall that all CDI beans (implicitly) have qualifier Any
         // If we leave out this qualifier annotation argument, qualifier Default is assumed
-        Set<Bean<?>> allCdiBeans = beanManager.getBeans(Object.class, new Any.Literal());
+        Set<Bean<?>> allCdiBeans = beanManager.getBeans(Object.class, Any.Literal.INSTANCE);
         return jsonProvider
                 .createArrayBuilder(allCdiBeans.stream().map(this::convertToJson).toList())
                 .build();
@@ -75,7 +75,7 @@ public class IntrospectionResource {
         // This returns all CDI beans in the given namespace, of any type and any set of qualifiers
         // Recall that all CDI beans (implicitly) have qualifier Any
         // If we leave out this qualifier annotation argument, qualifier Default is assumed
-        Set<Bean<?>> cdiBeans = beanManager.getBeans(Object.class, new Any.Literal())
+        Set<Bean<?>> cdiBeans = beanManager.getBeans(Object.class, Any.Literal.INSTANCE)
                 .stream()
                 .filter(bean ->
                         Optional.ofNullable(bean.getBeanClass().getPackage())

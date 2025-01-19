@@ -320,7 +320,7 @@ from libraries. The following code can be used as a starting point:
         // This returns all CDI beans, of any type and any set of qualifiers
         // Recall that all CDI beans (implicitly) have qualifier Any
         // If we leave out this qualifier annotation argument, qualifier Default is assumed
-        Set<Bean<?>> allCdiBeans = beanManager.getBeans(Object.class, new Any.Literal());
+        Set<Bean<?>> allCdiBeans = beanManager.getBeans(Object.class, Any.Literal.INSTANCE);
 ```
 
 The returned beans have properties such as:
