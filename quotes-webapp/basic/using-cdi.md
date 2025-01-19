@@ -70,13 +70,16 @@ such as DAO (data access object) types, service types, etc.
 There are multiple reasons for using Java interface types at injection points:
 * Writing a Java interface forces us to think about the *API contract* of the component, without being distracted by any implementation details
   * Often, multiple implementations of the interface will "organically start to appear", in particular for testing purposes
-  * So the idea is not to start with implementation classes and to then discover the common contract as Java interface
-  * Instead, the idea is to first think about the contract as Java interface, and then let implementation follow
+  * So the idea is *not* to start with implementation classes and to then discover the common contract as Java interface
+  * Instead, the idea is to *first think about the contract* as Java interface, and then let implementation follow
 * If needed, the interface allows for different implementations to be injected, such as a synchronous and asynchronous implementation of a certain dependency
 * This *flexibility* becomes really beneficial for testing purposes
   * For example, for testing purposes it may be desirable to have very lightweight service/DAO implementations that do not need any database, for example
   * So, when unit testing a Jakarta REST resource, why not use an injected service implementation requiring no database?
   * This may also reduce the need for traditional mocking (using Mockito etc.), which is often sensitive in that it may depend on internal implementation details
+* In a layered application architecture, interfaces as "layer contracts" offer good *isolation* between layers
+  * That is, higher layers are shielded from implementation details of lower layers
+  * Again, this increases flexibility (especially w.r.t. testing)
 * The dependency injection is still *compile-time typesafe*, just as class-based dependency injection
 
 It is also desirable to use *constructor-based injection* and stay away from field-based injection.
