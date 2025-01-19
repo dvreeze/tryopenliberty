@@ -85,7 +85,7 @@ There are multiple reasons for using *Java interface types* at injection points:
   * That is, higher layers are shielded from implementation details of lower layers
   * Again, this increases flexibility (especially w.r.t. testing)
 * The dependency injection is still *compile-time typesafe*, just as class-based dependency injection
-* Byte code manipulating tooling such as CDI might decide to use *composition rather than (concrete) inheritance*, if interfaces are used for application components
+* Byte code manipulating tooling such as CDI might decide to use *composition rather than (concrete) inheritance* for *proxy classes*, if interfaces are used for application components
   * This could lift inheritance-related restrictions on bean classes, such as making the class non-final, making its public methods non-final, offering a no-parameter constructor, etc.
 
 It is also desirable to use *constructor-based injection* and stay away from field-based injection.
