@@ -71,7 +71,7 @@ It is preferable to use *Java interfaces* as the *required type* at *injection p
 This does not always apply, of course, but it should be a common practice for "application components"
 such as DAO (data access object) types, service types, etc.
 
-There are multiple reasons for using Java interface types at injection points:
+There are multiple reasons for using *Java interface types* at injection points:
 * Writing a Java interface forces us to think about the *API contract* of the component, without being distracted by any implementation details
   * Often, multiple implementations of the interface will "organically start to appear", in particular for testing purposes
   * So the idea is *not* to start with implementation classes and to then discover the common contract as Java interface
@@ -85,6 +85,8 @@ There are multiple reasons for using Java interface types at injection points:
   * That is, higher layers are shielded from implementation details of lower layers
   * Again, this increases flexibility (especially w.r.t. testing)
 * The dependency injection is still *compile-time typesafe*, just as class-based dependency injection
+* Byte code manipulating tooling such as CDI might decide to use *composition rather than (concrete) inheritance*, if interfaces are used for application components
+  * This could lift inheritance-related restrictions on bean classes, such as making the class non-final, making its public methods non-final, offering a no-parameter constructor, etc.
 
 It is also desirable to use *constructor-based injection* and stay away from field-based injection.
 In general, it is a best practice to have constructors create fully initialized objects, thus making
@@ -400,10 +402,12 @@ so I'm curious how to best approach this "requirement".
 
 Sometimes *byte code manipulation* is needed by CDI to "decorate" classes with additional behaviour.
 For example, an application-scoped managed bean with request-scoped dependencies must create fresh instances
-of those dependencies for each request. For that, CDI needs to extend and enhance the bean class through
+of those dependencies for each request. For that, CDI may need to extend and enhance the bean class through
 byte code manipulation. This means that the managed bean class must be extensible. So it cannot be final,
 it cannot have final public instance methods, etc. The bean class must also have a non-private no-parameter
-constructor. Bean classes with pseudo-scope `Dependent` do not have these restrictions, though.
+constructor. Bean classes with pseudo-scope `Dependent` do not have these restrictions, though. Also, if
+the bean types are only *interface types* (and `java.lang.Object`, of course) it might be the case that
+CDI uses composition rather than concrete inheritance from the bean class, which would lift those restrictions.
 
 Finally, it has been said multiple times before, but:
 * Do use *CDI's dependency injection* (and contexts as well, of course)
