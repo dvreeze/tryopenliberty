@@ -235,8 +235,7 @@ section.
 Matching managed beans to injection points is called *typesafe resolution*. See
 [typesafe resolution](https://jakarta.ee/specifications/cdi/4.1/jakarta-cdi-spec-4.1#typesafe_resolution).
 
-This is resolution at the type level, so it has no relationship to (contextual) instances of the bean,
-or to their scopes. That is entirely unrelated. Typesafe resolution typically takes place at
+This is resolution at the type level, regardless of scopes. Typesafe resolution typically takes place at
 application *initialization* time.
 
 It is very important to understand that *typesafe resolution* is not based on just the *required types*
