@@ -26,6 +26,40 @@ uses a hard-coded dependency, which is quite inflexible and very hard to test in
 On the other hand, the example with dependency injection is quite flexible, enabling different implementations
 of the dependencies to be injected, including "mock" implementations for testing purposes.
 
+The example without dependency injection:
+
+```java
+public class Client {
+  private Service service;
+
+  Client() {
+    // The dependency is hard-coded.
+    this.service = new ExampleService();
+  }
+}
+```
+
+The example with constructor-based dependency injection:
+
+```java
+public class Client {
+    private Service service;
+
+    // The dependency is injected through a constructor.
+    Client(final Service service) {
+        if (service == null) {
+            throw new IllegalArgumentException("service must not be null");
+        }
+        this.service = service;
+    }
+}
+```
+
+Just imagine that in the example without dependency injection the created dependency is a
+`javax.sql.DataSource`. Surely the properties of the `DataSource` could be looked up from some
+property file (which one would depend on some "profile"), but this gets problematic very quickly,
+and certainly does not help in testing the `Client` class.
+
 In "enterprise" Java, *dependency injection* has been popularized by the *Spring framework*.
 
 It is preferable to use *Java interfaces* as the *required type* at *injection points*.
