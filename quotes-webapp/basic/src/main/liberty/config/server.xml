@@ -4,6 +4,7 @@
         <feature>jsonb-3.0</feature>
         <feature>cdi-4.0</feature>
         <feature>mpHealth-4.0</feature>
+        <feature>mpConfig-3.1</feature>
         <!-- See: https://openliberty.io/docs/latest/reference/feature/jdbc-4.3.html -->
         <feature>jdbc-4.3</feature>
     </featureManager>
