@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect;
 
+import com.google.common.base.Preconditions;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.dao.QuoteJdbcDao;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.rest.introspect.cdi.ApplicationBasePackage;
 import eu.cdevreeze.tryopenliberty.quoteswebapp.service.QuoteService;
@@ -204,6 +205,28 @@ public class IntrospectionResource {
                         "declaredAnnotations",
                         jsonProvider.createArrayBuilder(
                                 Arrays.stream(clazz.getDeclaredAnnotations()).map(Annotation::toString).toList()
+                        )
+                )
+                .add(
+                        "implementedInterfaces",
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getInterfaces())
+                                        .map(this::convertInterfaceToJson)
+                                        .toList()
+                        )
+                )
+                .build();
+    }
+
+    private JsonObject convertInterfaceToJson(Class<?> clazz) {
+        Preconditions.checkArgument(clazz.isInterface());
+        return jsonProvider.createObjectBuilder()
+                .add(
+                        clazz.getSimpleName(),
+                        jsonProvider.createArrayBuilder(
+                                Arrays.stream(clazz.getMethods())
+                                        .map(Method::toString)
+                                        .toList()
                         )
                 )
                 .build();
